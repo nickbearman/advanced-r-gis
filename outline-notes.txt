@@ -1,0 +1,80 @@
+Intro
+
+Lecture
+Overview
+Spatial Data in R 
+- @data
+- formatcs, shp, json, etc
+Explain EDA
+- levels of analysis 
+- numbers, exploratory, analysis
+Domains of IMD (overall and subdomains)
+
+prac 1
+Recap maps / Rstudio
+Prac Map making
+
+Lecture
+Morans I
+spatial autocorrelation
+Clustering of deprivation
+Public transport and deprivation
+
+Practical 2
+GeoDa 
+Morans i
+
+Lunch
+
+Lecture
+Buffer
+Union
+
+Practical
+3 R code functions point in polyogn
+buffer? 
+Unions of intersection over LSOA
+Calc average deprivation score
+
+Lecture
+Regression 
+
+Practical
+4 Prac Regression geoda & R
+
+> install.packages("spdep")
+also installing the dependencies ‘LearnBayes’, ‘coda’
+
+Lecture outline
+
+L1
+Recap
+Levels of working with data
+Making maps
+EDA
+IMD
+Spatial Data in R
+
+L2
+Spatial Autocorrelation
+Morans I
+Deprivation / clutsrting
+Public transport and depriavtion (breif)
+
+L3
+Spatial Decison Making
+Buffer / Intersection (point+poly, poly+poly)
+
+
+L4 
+Regression - an example
+GWR example
+
+Pros and cons of R
+ - repeating analysis
+ - polygon polygon analysis
+ 
+ L5
+ Closing
+ 
+
