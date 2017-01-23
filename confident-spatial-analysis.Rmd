@@ -4,6 +4,19 @@ author: "Nick Bearman"
 output: pdf_document
 ---
 
+Learning Outcomes: | R Functions & Libraries:  
+-------- | --------  
+Export data from R with projection information |  `writeOGR()` (pg. 3)  
+Understand Linked Displays in GeoDa  |  *brushing* (pg. 3)  
+Perform Local Indicators of Spatial Autocorrelation in GeoDa | *LISA* (pg. 5)  
+Perform Regression in R & GeoDa | `lm()` (pg. 8)  
+Understand how to read in a variety of formats | `readOGR()` (pg. 10)  
+Know how to reorder data | `order()` (pg. 13)  
+Understand creating and using functions within R | `function ()` (pg. 14)  
+Know how to use buffers within R  | `gBuffer()` (pg. 15)  
+<!-- Tables have a max line length, if it is too long, the table gets shrunk -->
+
+
 #1. Mapping Recap
 
 We are going to be looking at a range of data for Greater Manchester and we'll be using both RStudio and GeoDa. 
@@ -217,6 +230,8 @@ In this example, we use the `manchester_LSOA_IMD_hardwork` file as as example.
   hardwork <- manchester_hardwork@data$HWIND
 #set the variable(s) we using to predict
   var <- cbind(SOCHE = manchester_hardwork@data$SOCHSE, PRS = manchester_hardwork@data$PRS)
+  #SOCHE is social housing
+  #PRS is private rented
 #run the model  
   model <- lm(hardwork ~ var)
 #output some results
@@ -241,7 +256,7 @@ The key information in this part of the output is the strength of the model in s
 
 The next steps with Regression do depend on the type of data (numerical, categorical, ordinal or binary) as well as the origin and sample size of the data. We will not be going any further with regression today. 
 
-##Regression in GeoDa
+##(Non-Spatial) Regression in GeoDa
 
 We can also run the regression within GeoDa. When going through this, think about whether you find this easier or harder than performing the regression in RStudio. 
 
@@ -305,7 +320,7 @@ This creates a ```SpatialPointsDataFrame``` object. This second line (starting `
 
 Try `head(tram_stations@data)` to see the attribute table, similar to earlier. 
 
-We can also plot the data, on top of the Greater Manchester LSOAs. Note the change in colour (`col`) and size (`cex` for points and `lwd` for lines), to make the lines and stations more visible.
+We can also plot the data, on top of the Greater Manchester LSOAs. Note the change in colour (`col`) and size (`cex` for points and `lwd` for lines), to make the lines and stations more visible. We can also use different symbols, by substituting in `pch = 1` for `pch="."`. Try searching in Google "R plot pch" and see what the different options are. 
 
 ```{r, comment=NA,warning=FALSE,message=FALSE}
 #plot LSOAs
@@ -512,6 +527,6 @@ We need to decide which route is the most important. For this exercise we are go
   
   
   
-This practical was written using GeoDa 1.8.8 and RStudio 0.99. 
+This practical was written using GeoDa 1.8.12 and RStudio 1.0.136. 
 
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/deed.en. The latest version of the PDF is available from https://github.com/nickbearman/confident-spatial-analysis. This version was created on `r format(Sys.time(), '%d %B %Y')`. 
