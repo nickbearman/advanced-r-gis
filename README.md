@@ -6,6 +6,6 @@ The material for this workshop is avaliable here:
 - [The presentation given by Nick (PPT, 3.9 MB)](https://github.com/nickbearman/intermediate-r-spatial-analysis/raw/master/material/presentation.pptx)  
 - [The data used in the workshop (folder, total: 3.3 MB)](https://github.com/nickbearman/intermediate-r-spatial-analysis/tree/master/data)  
 
-This project was developed in RStudio Version 0.99. and GeoDa 0.99.
+This project was developed in GeoDa 1.8.12 and RStudio 1.0.136.
 
 Material will be updated periodically, usually in line with courses run by Nick Bearman. 
