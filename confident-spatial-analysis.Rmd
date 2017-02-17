@@ -48,7 +48,7 @@ Next, read in some data and plot the data.
 
 We are using `readOGR()` instead of `readShapeSpatial()` as this looks at the projection information as well; have a look at `manchester_lsoa@proj4string` to check. The function `readOGR()` has two parameters in this example - the folder the data is in (`data`) and the file name (`GreaterManchester_lsoa_2011`). If the shapefile was in the working folder (i.e. not in a subfolder) you would replace the folder name with `"."`. 
 
-Each LSOA has a code and a name, we are looking at a range of IMD values; we need to join the spatial data to the attribute data. Download the IMD data from http://bit.ly/1Qn4wUs (or https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/467774/File_7_ID_2015_All_ranks__deciles_and_scores_for_the_Indices_of_Deprivation__and_population_denominators.csv/preview). This file contains the IMD data for 2015 for all LSOAs in England.
+Each LSOA has a code and a name, we are looking at a range of IMD values; we need to join the spatial data to the attribute data. Download the IMD data from http://bit.ly/2kFAlex (or https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/467774/File_7_ID_2015_All_ranks__deciles_and_scores_for_the_Indices_of_Deprivation__and_population_denominators.csv). This file contains the IMD data for 2015 for all LSOAs in England.
 
 *There are 3 measures in this data - the IMD score, rank and decile. We will primarily be using the score, where the area with the highest score is the most deprived (with a rank of 1 and in the first decile).*
 
@@ -376,7 +376,7 @@ tram_stations_joined_reordered[1,]
 tram_stations_joined_reordered[91,]
 ```
 
-Can you create a map similar to this, with the 10 most deprived stations in red and the top 10 least deprived stations in blue, as well as adding an appropriate legend and title?
+Can you create a map similar to this (see over), with the 10 most deprived stations in red and the top 10 least deprived stations in blue as well as identifying the most and least deprived stations? As an optional extra, see if you can include an appropriate legend and title.
 
 ```{r, comment = NA, echo=FALSE}
 plot(tramlines)
