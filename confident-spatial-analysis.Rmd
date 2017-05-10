@@ -1,23 +1,118 @@
 ---
 title: "Confident Spatial Analysis"
-author: "Nick Bearman"
 output: pdf_document
+author: "Nick Bearman - Clear Mapping Co"
 ---
 
 Learning Outcomes: | R Functions & Libraries:  
 -------- | --------  
-Export data from R with projection information |  `writeOGR()` (pg. 3)  
-Understand Linked Displays in GeoDa  |  *brushing* (pg. 3)  
-Perform Local Indicators of Spatial Autocorrelation in GeoDa | *LISA* (pg. 5)  
-Perform Regression in R & GeoDa | `lm()` (pg. 8)  
-Understand how to read in a variety of formats | `readOGR()` (pg. 10)  
-Know how to reorder data | `order()` (pg. 13)  
-Understand creating and using functions within R | `function ()` (pg. 14)  
-Know how to use buffers within R  | `gBuffer()` (pg. 15)  
+Understand Linked Displays in GeoDa  |  *brushing* (pg. 2)  
+Perform Local Indicators of Spatial Autocorrelation in GeoDa | *LISA* (pg. 3)  
+Understand how to read in a variety of formats | `readOGR()` (pg. 8)  
+Know how to reorder data | `order()` (pg. 11)  
+Understand creating and using functions within R | `function ()` (pg. 13)  
+Know how to use buffers within R  | `gBuffer()` (pg. 14)  
 <!-- Tables have a max line length, if it is too long, the table gets shrunk -->
 
 
-#1. Mapping Recap
+#1. Spatial Analysis
+
+We are going to be performing some Exploratory Data Analysis using a program called GeoDa. The data we are using covers Manchester, UK. 
+
+For the analysis, we are interested in the deprivation levels. First of all, let's have a look at the data in a program called GeoDa.
+
+Download the data from http://www.nickbearman.me.uk/data/r/GreaterManchester_lsoa_2011_imd.zip and extract the zip file. 
+
+- Click **Start > GeoDa** 
+- When GeoDa opens, click on the folder icon 
+- Select **ESRI Shapefile (.shp)** 
+- Browse to and open **GreaterManchester_lsoa_2011_imd.shp** 
+
+![New Project from ESRI Shape File](images/geoda-file-open-shape-file.png){ height=40% }
+
+GeoDa should open a map display of the data automatically. We can create a simple choropleth map in here by right clicking on the map and then select **Change Current Map Type**. Select **Natural Breaks > 5** and choose the variable to map (we want **IMDscore**). Then a classified map will appear, similar to one we have created in RStudio. 
+
+Also open the attribute table ![Attribute Table](images/attribute-table.png){ height=20 } and a histogram ![Histogram](images/histogram.png){ height=20 } for `IMDscore`. GeoDa allows us to use brushing or linked displays. Select one of the larger bars in the histogram and you will see that the same entries are highlighted on the map and in the attribute table. You can also draw a box on the map (left-click and drag) and that will highlight the entries as well (you can drag the box around). 
+
+*How is this different to interacting with the data in RStudio, or QGIS/ArcGIS if you have used those packages? Is it better / easier to use? Or harder to use?*
+
+We will now perform some spatial analysis within GeoDa. There is some preparatory work to do beforehand, which is creating the spatial weights. This is how GeoDa works out which polygons are next to each other and which ones to include when running local analysis (these are how we define 'neighbours', as I mentioned in the presentation).
+
+Select **Tools > Weights Manager** and click **Create**.  The following screen is displayed. 
+
+![Weights File Creation](images/weights.png){ height=40% }
+
+Select **Add ID Variable...** and accept the default name. You now need to choose the neighbourhood weight method.  Select **Queen Contiguity** and click **Create**.  The neighbourhood weight matrix is saved in a file.  A suggested name is given.  This is the LSOA shape file name with a suffix of .gal.  Select **Save** and after a few seconds you should see a message Weights file “manchester_LSOA_IMD.gal” created successfully. Click **OK** on this window and **Close** on the Weights File Creation window. The Weights Manager window should show the details of the neighbours you have just selected. 
+
+Click **Histogram** and you can see how many neighbours each polygon has. In my data, five is the most common number of neighbours. Close this and open the **Connectivity Map**, which shows the neighbours for each polygon. Close this and the Weights Manager when you are happy with it. 
+
+##Moran's I
+
+We can now start to explore the spatial patterns of the model we want to develop.  Click on the **Space** item on the GeoDa menu.  First we are going to look at the global indicator of spatial autocorrelation.  Select the first menu item **Univariate Moran’s I**.  A list of variables is displayed.  Choose the `IMDscore` variable.  Select the weights file we created earlier. 
+
+![Moran's I](images/morans-i.png){ height=40% }
+
+A new window opens with a scatterplot of the HWIND variable and the ‘lagged IMDscore’ variable.  The ‘lagged IMDscore’ variable is the value of the IMD Score for the selected neighbourhood and its neighbours as defined when we set the spatial weights.  The scatter-plot suggests a positive correlation between the variables.  This means that there is a weak positive spatial autocorrelation. It has a value of 0.2534 confirming this positive spatial autocorrelation. We will now look at the local indicators of spatial association.  
+
+##Local Indicators of Spatial Association (LISA)
+
+Select **Space > Univariate Local Moran's I**.  Select the `IMDscore` variable from the list displayed and select the weights file used earlier (it should be selected automatically).  A screen with three checkboxes is shown.  Check all three and click **OK**.  A number of windows are produced.  The scatterplot is the same as we produced in the previous section. The two maps shown below are produced.  You will probably need to expand them to full screen to see the legends and patterns displayed.
+
+![LISA Cluster and Significance Maps](images/lisa.png){ height=35% }
+
+The first map shows the extent to which neighbouring areas are clustered:  
+  
+- red areas are neighbourhoods with a high proportion of deprived areas surrounded by similar neighbourhoods 
+- darker blue areas are neighbourhoods with a low proportion of deprived areas surrounded by similar neighbourhoods 
+- lighter blue areas are neighbourhoods with a low proportion of deprived areas surrounded by neighbourhoods with a high proportion of deprived areas 
+- pink areas are neighbourhoods with a high proportion of deprived areas surrounded by neighbourhoods with a low proportion of deprived areas 
+- white areas are neighbourhoods where the surrounding neighbourhoods do not generate a statistically significant relationship. 
+
+The second map shows the level of statistical significance.  The values are 0.05, 0.01, 0.001 and 0.0001.
+
+We can see that areas of high and low deprivation cluster together.
+
+Now that we have the clustering output, we can save these to the shapefile and then load them into R to map or to do other analysis. *Moving data from one GIS application to another is something that happens regularly with some of the projects I am working on!* 
+
+Right click on the map and choose **Save Results**. Tick all three boxes (to save all of the results). This will create a new variable in the shapefile for each of the results we are saving. It should look like this:
+
+![Saving LISA Results](images/save-lisa.png){ height=30% }
+
+Open the attribute table and you can see the three new variables on the left hand side of the table. Click the Save button to save the updated shapefile. **We have now clicked Save twice - this is needed as only the save button on the main window will actually write the file to disk.**
+
+##Moran's I in R (optional exercise)
+
+We can also perform the same analysis in R. Load this shapefile back into RStudio - I will let you work out the code required!
+
+```{r, comment = NA, echo = FALSE, message = FALSE, display = FALSE, warning = FALSE, results='hide'}
+#load library
+library(rgdal)
+#read in file
+GreaterManchester_lsoa_2011_imd_cluster <- readOGR(".", "GreaterManchester_lsoa_2011_imd_cluster")
+```
+
+Your data should look like this:
+
+```{r, comment = NA}
+head(GreaterManchester_lsoa_2011_imd_cluster@data)
+```
+
+To do the Moran's I analysis, we need another library:
+
+```{r, comment=NA, message=FALSE, display=FALSE, warning = FALSE}
+#load the library
+  library(spdep)
+#work out the neighbours
+  GreaterManchester_lsoa_nb <- poly2nb(GreaterManchester_lsoa_2011_imd_cluster)
+#reformat the list of neighbours to a weight matrix
+  GreaterManchester_lsoa_lw <- nb2listw(GreaterManchester_lsoa_nb)
+#run the test
+  moran.test(GreaterManchester_lsoa_2011_imd_cluster@data$IMDscore, GreaterManchester_lsoa_lw)
+```
+
+This gives us the Moran's I statistic, as well as some associated variables. It is possible to run a whole range of analysis, which goes beyond the scope of this course. 
+
+#2. Mapping Recap
 
 We are going to be looking at a range of data for Greater Manchester and we'll be using both RStudio and GeoDa. 
 
@@ -45,8 +140,6 @@ Next, read in some data and plot the data.
 #plot data
   plot(manchester_lsoa)
 ```
-
-We are using `readOGR()` instead of `readShapeSpatial()` as this looks at the projection information as well; have a look at `manchester_lsoa@proj4string` to check. The function `readOGR()` has two parameters in this example - the folder the data is in (`data`) and the file name (`GreaterManchester_lsoa_2011`). If the shapefile was in the working folder (i.e. not in a subfolder) you would replace the folder name with `"."`. 
 
 Each LSOA has a code and a name, we are looking at a range of IMD values; we need to join the spatial data to the attribute data. Download the IMD data from http://bit.ly/2kFAlex (or https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/467774/File_7_ID_2015_All_ranks__deciles_and_scores_for_the_Indices_of_Deprivation__and_population_denominators.csv). This file contains the IMD data for 2015 for all LSOAs in England.
 
@@ -111,174 +204,8 @@ Now we have a map of IMD by LSOA in Greater Manchester.
 
 **Make sure you are happy with the code you have used. Check the glossary, help in RStudio (`?functionname`) or Google for any functions you have not come across before.**
 
-#2. Spatial Analysis
 
-For the analysis, we are interested in the deprivation levels. First of all, let's have a look at the data in a program called GeoDa.
-
-We need the IMD data to be joined to the LSOA shapefile for using it in GeoDa, so let's save our joined data frame as a shapefile. We can use the `writeOGR()` function to do this. The convention is very similar to `readOGR()` - see help (`?writeOGR`) for details.
-
-```{r, comment=NA, eval = FALSE}
-writeOGR(manchester_lsoa, ".", "manchester_LSOA_IMD", "ESRI Shapefile")
-```
-
-This will save a new shapefile in your working folder. We need to open this in GeoDa. Open GeoDa and click **File > New Project From > ESRI Shapefile (.shp)...**: 
-
-![New Project from ESRI Shape File](images/geoda-file-open-shape-file.png)
-
-GeoDa should open a map display of the data automatically. We can create a simple choropleth map in here by right clicking on the map and then select **Change Current Map Type**. Select **Natural Breaks > 5** and choose the variable to map (we want **IMDscore**). Then a classified map will appear, similar to one we have created in RStudio. 
-
-Also open the attribute table ![Attribute Table](images/attribute-table.png){ height=20 } and a histogram ![Histogram](images/histogram.png){ height=20 } for `IMDscore`. GeoDa allows us to use brushing or linked displays. Select one of the larger bars in the histogram and you will see that the same entries are highlighted on the map and in the attribute table. You can also draw a box on the map (left-click and drag) and that will highlight the entries as well (you can drag the box around - hold down Control). 
-
-*How is this different to interacting with the data in RStudio, or QGIS/ArcGIS if you have used those packages? Is it better / easier to use? Or harder to use?*
-
-We will now perform some spatial analysis within GeoDa. There is some preparatory work to do beforehand, which is creating the spatial weights. This is how GeoDa works out which polygons are next to each other and which ones to include when running local analysis (these are how we define the 'neighbours', that I mentioned in the presentation).
-
-Select **Tools > Weights Manager** and click **Create**.  The following screen is displayed. 
-
-![Weights File Creation](images/weights.png){ height=40% }
-
-Select **Add ID Variable...** and accept the default name. You now need to choose the neighbourhood weight method.  Select **Queen Contiguity** and click **Create**.  The neighbourhood weight matrix is saved in a file.  A suggested name is given.  This is the LSOA shape file name with a suffix of .gal.  Select **Save** and after a few seconds you should see a message Weights file “manchester_LSOA_IMD.gal” created successfully. Click **OK** on this window and **Close** on the Weights File Creation window. The Weights Manager window should show the details of the neighbours you have just selected. 
-
-Click **Histogram** and you can see how many neighbours each polygon has. In my data, five is the most common number of neighbours. Close this and the Weights Manager when you are happy with it. 
-
-##Moran's I
-
-We can now start to explore the spatial patterns of the model we want to develop.  Click on the **Space** item on the GeoDa menu.  First we are going to look at the global indicator of spatial autocorrelation.  Select the first menu item **Univariate Moran’s I**.  A list of variables is displayed.  Choose the `IMDscore` variable.  Select the weights file we created earlier. 
-
-![Moran's I](images/morans-i.png){ height=40% }
-
-A new window opens with a scatterplot of the HWIND variable and the ‘lagged IMDscore’ variable.  The ‘lagged IMDscore’ variable is the value of the IMD Score for the selected neighbourhood and its neighbours as defined when we set the spatial weights.  The scatter-plot suggests a positive correlation between the variables.  This means that there is a weak positive spatial autocorrelation. It has a value of 0.2384 confirming this positive spatial autocorrelation. We will now look at the local indicators of spatial association.  
-
-##Local Indicators of Spatial Association (LISA)
-
-Select **Space > Univariate Local Moran's I**.  Select the `IMDscore` variable from the list displayed and select the weights file used earlier (it should be selected automatically).  A screen with three checkboxes is shown.  Check all three and click **OK**.  A number of windows are produced.  The scatterplot is the same as we produced in the previous section. The two maps shown below are produced.  You will probably need to expand them to full screen to see the legends and patterns displayed.
-
-![LISA Cluster and Significance Maps](images/lisa.png){ height=35% }
-
-The first map shows the extent to which neighbouring areas are clustered:  
-  
-- red areas are neighbourhoods with a high proportion of deprived areas surrounded by similar neighbourhoods 
-- darker blue areas are neighbourhoods with a low proportion of deprived areas surrounded by similar neighbourhoods 
-- lighter blue areas are neighbourhoods with a low proportion of deprived areas surrounded by neighbourhoods with a high proportion of deprived areas 
-- pink areas are neighbourhoods with a high proportion of deprived areas surrounded by neighbourhoods with a low proportion of deprived areas 
-- white areas are neighbourhoods where the surrounding neighbourhoods do not generate a statistically significant relationship. 
-
-The second map shows the level of statistical significance.  The values are 0.05, 0.01, 0.001 and 0.0001.
-
-We can see that areas of high and low deprivation cluster together.
-
-Now that we have the clustering output, we can save these to the shapefile and then load them into R to map or todo other analysis. *Moving data from one GIS application to another is something that happens regularly with some of the projects I am working on!* 
-
-Right click on the map and choose **Save Results**. Tick all three boxes (to save all of the results). This will create a new variable in the shapefile for each of the results we are saving. It should look like this:
-
-![Saving LISA Results](images/save-lisa.png){ height=30% }
-
-Open the attribute table and you can see the three new variables on the left hand side of the table. Click the save button to save the updated shapefile. 
-
-Now we need to load this shapefile back into RStudio - some code I will let you work out for yourself!
-
-```{r, comment = NA, echo = FALSE, message = FALSE, display = FALSE, warning = FALSE, results='hide'}
-manchester_LSOA_IMD_cluster <- readOGR(".", "manchester_LSOA_IMD")
-```
-
-Your data should look like this:
-
-```{r, comment = NA}
-head(manchester_LSOA_IMD_cluster@data)
-```
-
-##Moran's I in R
-
-For some analysis we don't need to leave RStudio. For example, we can do the Moran's I analysis within RStudio. To do this, we need another library:
-
-```{r, comment=NA, message=FALSE, display=FALSE, warning = FALSE}
-#load the library
-  library(spdep)
-#work out the neighbours
-  manchester_lsoa_nb <- poly2nb(manchester_lsoa)
-#reformat the list of neighbours to a weight matrix
-  manchester_lsoa_lw <- nb2listw(manchester_lsoa_nb)
-#run the test
-  moran.test(manchester_lsoa@data$IMDscore, manchester_lsoa_lw)
-```
-
-This gives us the Moran's I statistic, as well as some associated variables. It is possible to run a whole range of analysis, which goes beyond the scope of this course. 
-
-#Regression (optional exercise)
-
-We can use a regression model to explore what other factors might be involved in deprivation levels. (Data and information from http://www.nickbearman.me.uk/data/r/regression.zip).
-
-The data provided also has an additional indicator value ("hard working indicator") as well as IMD. This is calculated by dividing the employed full time population by the total population. We can run the regression analysis on either indicator value - IMD or hard working. There is a separate file that gives the definitions of the variables (`variables-hardwork.docx`). 
-
-We can run the regression model in either GeoDa or R. I will briefly outline the steps for R and GeoDa below. More detailed instructions for GeoDa are available ('geoda-spatial-analysis.docx') and for R, there are many books and web resources available (for example, [http://www.statmethods.net/stats/regression.html](http://www.statmethods.net/stats/regression.html)). 
-
-##Regression in R
-
-In this example, we use the `manchester_LSOA_IMD_hardwork` file as as example. 
-
-```{r, comment=NA, echo=FALSE, warning=FALSE, message = FALSE}
-#download data
-  download.file("http://www.nickbearman.me.uk/data/r/regression.zip","regression.zip")
-#unzip
-  unzip("regression.zip")
-```
-```{r, comment=NA, warning=FALSE, message = FALSE}
-#load data
-  manchester_hardwork <- readOGR(".", "manchester_LSOA_IMD_hardwork")
-
-#set the variable we are predicting    
-  hardwork <- manchester_hardwork@data$HWIND
-#set the variable(s) we using to predict
-  var <- cbind(SOCHE = manchester_hardwork@data$SOCHSE, PRS = manchester_hardwork@data$PRS)
-  #SOCHE is social housing
-  #PRS is private rented
-#run the model  
-  model <- lm(hardwork ~ var)
-#output some results
-  summary(model)
-
-#setup for IMD being the predictor variable
-  IMDscore <- manchester_hardwork@data$IMDscore
-#run second model
-  model2 <- lm(IMDscore ~ var)
-#output results
-  summary(model2)
-```
-
-The key information in this part of the output is the strength of the model in showing the association between hard working neighbourhoods and tenure, the measures of model fit and the coefficients.  For this exercise we are only going to focus on one of the model fit measures, the Akaike info criterion.  The documentation on GeoDa provides comprehensive information on regression outputs. 
-
-- **R-squared and Adjusted R-squared**  
-  the value suggests that this model explains 58% of the variance in hard working neighbourhoods
-- **Akaike info criterion (AIC)**  
-  AIC is an indicator that allows for comparison between models.  A lower value indicates a better fit.  The value of -3718.28 is on an absolute scale so larger negative numbers will suggest a better fitting model 
-- **Coefficients**  
-  These suggest the strength and nature of the association between the independent variables and the dependent variable.  As we are using tenure as our predictor these are relative to ownership.  Social housing (SOCHSE) is negatively associated with hard working neighbourhoods.  Assuming a linear relationship this model suggests that for each additional 1% of social housing in a neighbourhood there is a reduction of 0.46% in hard working people. The proportion in the private rented sector (PRS) is also significant and negatively associated with hard working neighbourhoods.
-
-The next steps with Regression do depend on the type of data (numerical, categorical, ordinal or binary) as well as the origin and sample size of the data. We will not be going any further with regression today. 
-
-##(Non-Spatial) Regression in GeoDa
-
-We can also run the regression within GeoDa. When going through this, think about whether you find this easier or harder than performing the regression in RStudio. 
-
-Select **Regression > Regression**.  
-
-A screen now asks you to set the dependent and independent variables for your regression model. For the dependent variable select HWIND and use the right arrow to the right of the Select Variables box to confirm.  You may notice that the arrow buttons below this are now enabled.  Select SOCHSE and press the right arrow that is further down the screen. Repeat for the variable PRS. Check the Weights File box which should point to the spatial weights file we generated earlier (you will need to create this, using the process we covered earlier).  We are now going to run a standard regression on the association between hard working neighbourhoods and tenure. 
-
-Click Run and View Results if necessary. 
-
-![GeoDa Regression Results](images/regression.png){ height=60% }
-
-The output is similar to that from RStudio, but with more diagnostics provided for multicollinearity, normality of errors and heteroscedasticity. These are also available for RStudio (have a look at the help, `?lm`, for more details). We will not be covering the interpretation of these today.
-
-##Geographically Weighted Regression
-
-Geographically Weighted Regression (GWR) develops the principle of applying a regression to spatial data by taking into account the spatial location of the data. It is a complex method, but it highlights how the regression model varies in different locations. 
-
-For more details, see https://cran.r-project.org/web/packages/spgwr/ and related academic references (e.g. Fotheringham et al., 2002,  Geographically Weighted Regression:
-The Analysis of Spatially Varying Relationships, [http://eu.wiley.com/WileyCDA/WileyTitle/productCd-0471496162.html](http://eu.wiley.com/WileyCDA/WileyTitle/productCd-0471496162.html). 
-
-
-#Public Transport and Deprivation
+#3. Public Transport and Deprivation
 
 Public transport has an important role to play in tackling deprivation. We can use RStudio to see where the trams in Manchester run and how they relate to deprived areas. 
 
@@ -513,7 +440,7 @@ We now have the average deprivation for each tram stop. **How is this different 
 - Try running the analysis with a different buffer. How easy is this within R compared to another GIS? 
 - How about doing a polygon polygon overlay? How easy is this in R compared to another GIS? *See http://gis.stackexchange.com/questions/140504/extracting-intersection-areas-in-r for some interesting suggestions.*
 
-*If you want to install additional libraries, you can do this, but on the University of Liverpool machines, it will only install onto that machine, so if you use a different machine you may need to rerun the installation command.*
+*If you want to install additional libraries, you can do this, but on centrally managed machines, it will only install onto that machine, so if you use a different machine you may need to rerun the installation command.*
 
 ##Future Developments (optional exercise)
 
@@ -527,6 +454,6 @@ We need to decide which route is the most important. For this exercise we are go
   
   
   
-This practical was written using GeoDa 1.8.12 and RStudio 1.0.136. 
+This practical was written using GeoDa 1.8.16, R 3.4.0 and RStudio 1.0.143. 
 
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/deed.en. The latest version of the PDF is available from https://github.com/nickbearman/confident-spatial-analysis. This version was created on `r format(Sys.time(), '%d %B %Y')`. 
