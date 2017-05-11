@@ -7,7 +7,7 @@ author: "Nick Bearman - Clear Mapping Co"
 Learning Outcomes: | R Functions & Libraries:  
 -------- | --------  
 Understand Linked Displays in GeoDa  |  *brushing* (pg. 2)  
-Perform Local Indicators of Spatial Autocorrelation in GeoDa | *LISA* (pg. 3)  
+Perform Local Indicators of Spatial Association in GeoDa | *LISA* (pg. 3)  
 Understand how to read in a variety of formats | `readOGR()` (pg. 8)  
 Know how to reorder data | `order()` (pg. 11)  
 Understand creating and using functions within R | `function ()` (pg. 13)  
