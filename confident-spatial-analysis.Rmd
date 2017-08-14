@@ -21,7 +21,7 @@ We are going to be performing some Exploratory Data Analysis using a program cal
 
 For the analysis, we are interested in the deprivation levels. First of all, let's have a look at the data in a program called GeoDa.
 
-Download the data from http://www.nickbearman.me.uk/data/r/GreaterManchester_lsoa_2011_imd.zip and extract the zip file. 
+Download the data from http://bit.ly/csaprac1 and extract the zip file. 
 
 - Click **Start > GeoDa** 
 - When GeoDa opens, click on the folder icon 
@@ -78,11 +78,11 @@ Right click on the map and choose **Save Results**. Tick all three boxes (to sav
 
 ![Saving LISA Results](images/save-lisa.png){ height=30% }
 
-Open the attribute table and you can see the three new variables on the left hand side of the table. Click the Save button to save the updated shapefile. **We have now clicked Save twice - this is needed as only the save button on the main window will actually write the file to disk.**
+Open the attribute table and you can see the three new variables on the right hand side of the table. Click the Save button to save the updated shapefile. **We have now clicked Save twice - this is needed as only the save button on the main window will actually write the file to disk.**
 
 ##Moran's I in R (optional exercise)
 
-We can also perform the same analysis in R. Load this shapefile back into RStudio - I will let you work out the code required!
+We can also perform the same analysis in R. Load this shapefile back into RStudio - I will let you work out the code required! *Remember you will need to load the library **rgdal** to read spatial data.*
 
 ```{r, comment = NA, echo = FALSE, message = FALSE, display = FALSE, warning = FALSE, results='hide'}
 #load library
