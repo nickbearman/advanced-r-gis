@@ -1,0 +1,15 @@
+software-requirements
+
+GeoDa (1.8.16 or above) http://geodacenter.github.io/download.html
+
+R (3.5 or above)
+RStudio (1.1.456 or above)
+
+Libraries:
+rgeos
+rgdal
+maptools
+classInt
+RColorBrewer
+
+  
