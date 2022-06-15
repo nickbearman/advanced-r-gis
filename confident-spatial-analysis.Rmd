@@ -5,6 +5,7 @@ output:
   pdf_document: default
   html_document:
     df_print: paged
+date: "Fri 24th June 2022"
 ---
 
 ```{r setup, echo=FALSE}
@@ -15,11 +16,11 @@ knitr::opts_knit$set(root.dir = 'C:/Users/nick/Dropbox/Work/course-repos/04-conf
 Learning Outcomes: | R Functions & Libraries:  
 -------- | --------  
 Understand Linked Displays in GeoDa  |  *brushing* (pg. 1)  
-Perform Local Indicators of Spatial Association in GeoDa | *LISA* (pg. 3)   
-Understand how to read in a variety of formats | `readOGR()` (pg. 5)  
-Know how to reorder data | `order()` (pg. 12) 
-Understand creating and using functions within R | `function ()` (pg. 13)    
-Know how to use buffers within R  | `gBuffer()` (pg. 14)   
+Perform Local Indicators of Spatial Association | *LISA* (pg. 3)   
+Understand how to read in a variety of formats | `st_read()` (pg. 6)  
+Know how to reorder data | `order()` (pg. 16) 
+Know how to use buffers within R  | `st_buffer()` (pg. 19)   
+<!-- Understand creating and using functions within R | `function ()` (pg. 13)  -->  
 <!-- Tables have a max line length, if it is too long, the table gets shrunk -->
 
 
@@ -29,7 +30,7 @@ We are going to be performing some Exploratory Data Analysis using a program cal
 
 For the analysis, we are interested in the deprivation levels. First of all, let's have a look at the data in a program called GeoDa.
 
-Download the data from http://bit.ly/csaprac1 and extract the zip file. 
+Download the data from http://bit.ly/csaprac1 or OneDrive (GreaterManchester_lsoa_2011_imd.zip) and extract the zip file. 
 
 - Click **Start > GeoDa** 
 - When GeoDa opens, click on the folder icon 
@@ -162,7 +163,7 @@ Each LSOA has a code and a name, we are looking at a range of IMD values; we nee
 
 *There are 3 measures in this data - the IMD score, rank and decile. We will primarily be using the score, where the area with the highest score is the most deprived (with a rank of 1 and in the first decile).*
 
-Download the CSV file to your working directory, rename it to something more sensible and read it in:
+Download the CSV file to your working directory, rename it to something more sensible like `imd.csv` and read it in:
 
 *Renaming files with long names to a much shorter file name is a good way of avoiding typos.*
 
