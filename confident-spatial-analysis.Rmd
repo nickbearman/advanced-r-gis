@@ -306,12 +306,12 @@ Now we have a map of IMD by LSOA in Greater Manchester.
 
 Public transport has an important role to play in tackling deprivation. We can use RStudio to see where the trams in Manchester run and how they relate to deprived areas. 
 
-Firstly, we need to load some libraries (`sf` and `tmap`) and a new one - `tidyverse`. Remember to install it if you need to. Then we need to read in and join the LSOA data. 
+Firstly, we need to load some libraries (`sf` and `tmap`) and a new one - `dplyr`. Remember to install it if you need to. Then we need to read in and join the LSOA data. 
 
 ```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
 library(sf)
 library(tmap)
-library(tidyverse)
+library(dplyr)
 #read in manchester LSOA data
   manchester_lsoa <- st_read("GreaterManchester_lsoa_2011.shp")
 #join IMD data

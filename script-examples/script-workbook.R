@@ -6,7 +6,7 @@ download.file("http://www.nickbearman.me.uk/data/r/GreaterManchester_lsoa_2011.z
 #unzip
 unzip("GreaterManchester_lsoa_2011.zip")
 
-library(tidyverse)
+library(dplyr)
 library(sf)
 library(tmap)
 manchester_lsoa <- st_read("GreaterManchester_lsoa_2011.shp")
