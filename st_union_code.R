@@ -80,5 +80,5 @@ tm_shape(wt_imd_pt) +
   tm_shape(wt_imd_pt[81:91,]) +
   tm_dots(wt_imd_pt[81:91,], size = 0.1, shape = 19, col = "blue") 
 
-
+#weighted-average-graph.png
 
