@@ -1,6 +1,8 @@
 # Practical 3: Spatial Decision Making
 # sf version
 
+setwd("~/work/confident-spatial-analysis/data-user")
+
 download.file("http://www.nickbearman.me.uk/data/r/GreaterManchester_lsoa_2011.zip",
               "GreaterManchester_lsoa_2011.zip")
 #unzip
@@ -29,6 +31,11 @@ tm_shape(manchester_lsoa) +
   tm_polygons("IMDscore", title = "IMD Score", palette = "Blues", style = "jenks") +
   tm_layout(legend.title.size = 0.8)
 
+#download data
+download.file("http://www.nickbearman.me.uk/data/r/tram.zip","tram.zip")
+#unzip
+unzip("tram.zip")
+#read in tramline data
 tramlines <- st_read(dsn = "tramlines.geojson")
 
 qtm(tramlines)
