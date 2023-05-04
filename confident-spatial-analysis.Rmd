@@ -325,7 +325,7 @@ library(dplyr)
   head(manchester_lsoa)
 ```
   
-Secondly, load the tramline data, available as a GeoJSON file. This is a different type of file to a shape file and is an XML based format (open it in Notepad if you are interested in how it is structured). `readOGR()` can read all sorts of file formats, so we can adapt the code easily.   
+Secondly, load the tramline data, available as a GeoJSON file. This is a different type of file to a shape file and is an XML based format (open it in Notepad if you are interested in how it is structured). `st_read()` can read all sorts of file formats, so we can adapt the code easily.   
   
 ```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
   #download data
