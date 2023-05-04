@@ -1,0 +1,17 @@
+Which is the best classification method?
+Equal Interval
+Natural Breaks / Jenks / Fisher
+Standard Deviation
+It depends on what you are trying to show in the data
+It depends on the distribution of the data
+
+If we want to see how many points are in a polygon, what analysis do we use?
+Polygon on Point
+Point in Polygon
+Union
+Point over Polygon
+
+What coordinate system are these coordinates likely to be in?  619301 307416
+British National Grid (Eastings & Northings) EPSG = 27700
+UTM (Universal Transverse Mercator) Zone 37 N EPSG = 32630
+Latitude and Longitude (WGS 1984) EPSG = 4326
