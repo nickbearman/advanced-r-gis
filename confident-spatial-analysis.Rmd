@@ -5,12 +5,13 @@ output:
   pdf_document: default
   html_document:
     df_print: paged
-date: "Thu 13th April 2023"
+date: "Thu 4th May 2023"
 ---
 
 ```{r setup, echo=FALSE}
 #set working directory to /data-user
-knitr::opts_knit$set(root.dir = 'C:/Users/nick/Dropbox/Work/course-repos/04-confident-spatial-analysis-r-geoda/data-user')
+#knitr::opts_knit$set(root.dir = 'C:/Users/nick/Dropbox/Work/course-repos/04-confident-spatial-analysis-r-geoda/data-user')
+knitr::opts_knit$set(root.dir = '/home/nickbearman/work/confident-spatial-analysis/data-user')
 ```
 
 Learning Outcomes: | R Functions & Libraries:  
@@ -167,11 +168,11 @@ Download the CSV file to your working directory, rename it to something more sen
 
 *Renaming files with long names to a much shorter file name is a good way of avoiding typos.*
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 imd <- read.csv("File_7_ID_2015_All_ranks__deciles_and_scores_for_the_Indices_of_Deprivation__and_population_denominators.csv", header = TRUE)
 ```
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 imd <- read.csv("imd.csv", header = TRUE)
 ```
 
@@ -231,11 +232,11 @@ Next, read in some data and plot the data.
 
 We can use the same `imd.csv` file from earlier:
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 imd <- read.csv("File_7_ID_2015_All_ranks__deciles_and_scores_for_the_Indices_of_Deprivation__and_population_denominators.csv", header = TRUE)
 ```
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 imd <- read.csv("imd.csv", header = TRUE)
 ```
 
