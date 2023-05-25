@@ -88,11 +88,11 @@ tm_shape(stations_in_LSOA) +
 
 #show top / bottom stations
 tm_shape(stations_in_LSOA) +
-  tm_dots(stations_in_LSOA, size = 0.1, shape = 19, col = "darkred") +
+  tm_dots(size = 0.1, shape = 19, col = "darkred") +
   tm_shape(stations_in_LSOA[1:10,]) +
-  tm_dots(stations_in_LSOA[1:10,], size = 0.1, shape = 19, col = "red") +
+  tm_dots(size = 0.1, shape = 19, col = "red") +
   tm_shape(stations_in_LSOA[82:92,]) +
-  tm_dots(stations_in_LSOA[82:92,], size = 0.1, shape = 19, col = "blue") 
+  tm_dots(size = 0.1, shape = 19, col = "blue") 
 
 # to page 13 ( 1 to 1 join)
 
