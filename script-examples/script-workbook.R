@@ -3,50 +3,39 @@
 
 setwd("~/work/confident-spatial-analysis/data-user")
 
-download.file("http://www.nickbearman.me.uk/data/r/GreaterManchester_lsoa_2011.zip",
-              "GreaterManchester_lsoa_2011.zip")
-#unzip
-unzip("GreaterManchester_lsoa_2011.zip")
-
-library(dplyr)
 library(sf)
 library(tmap)
-manchester_lsoa <- st_read("GreaterManchester_lsoa_2011.shp")
 
+#read in shapefile
+manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
+#head
+head(manchester_lsoa)
 qtm(manchester_lsoa)
 
-imd <- read.csv("imd.csv", header = TRUE)
-#delete columns we don't need
-imd <- imd[,1:7]
-#rename columns
-colnames(imd) <- c("LSOAcode","LSOAname","LADcode","LADname","IMDscore","IMDrank","IMDdecile")
-
-head(imd)
-
-manchester_lsoa <- merge(manchester_lsoa, imd, by.x = "CODE", by.y = "LSOAcode")
-
-head(manchester_lsoa)
-
 tm_shape(manchester_lsoa) +
-  tm_polygons("IMDscore", title = "IMD Score", palette = "Blues", style = "jenks") +
+  tm_polygons("IMDscor", title = "IMD Score", palette = "Blues", style = "jenks") +
   tm_layout(legend.title.size = 0.8)
 
 #download data
-download.file("http://www.nickbearman.me.uk/data/r/tram.zip","tram.zip")
+#download.file("http://www.nickbearman.me.uk/data/r/tram.zip","tram.zip")
 #unzip
-unzip("tram.zip")
+#unzip("tram.zip")
 #read in tramline data
-tramlines <- st_read(dsn = "tramlines.geojson")
+tramlines <- st_read("Metrolink_Lines_Functional.shp")
 
 qtm(tramlines)
 
 #tram stations
 
-tram_stations_CSV <- read.csv("metrolink-stations.csv", header = TRUE)
-head(tram_stations_CSV)
+stations_CSV <- read.csv("TfGMMetroRailStops.csv", header = TRUE)
+head(stations_CSV)
+
+#subset out Metrolink stations
+metrolink_stations_CSV <- stations_CSV[which(stations_CSV$NETTYP == "M"),]
+head(metrolink_stations_CSV)
 
 #make as a sf layer
-tram_stations <- st_as_sf(tram_stations_CSV, coords = c('X', 'Y'), crs = 27700)
+tram_stations <- st_as_sf(metrolink_stations_CSV, coords = c('GMGRFE', 'GMGRFN'), crs = 27700)
 
 qtm(tram_stations)
 head(tram_stations)
@@ -55,11 +44,18 @@ tm_shape(tram_stations) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") 
 
 tm_shape(tram_stations) +
+  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+tm_shape(tramlines) +
+  tm_lines(col = "black")
+
+tm_shape(tram_stations) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") + 
   tm_shape(manchester_lsoa) +
   tm_borders()
 
 qtm(tram_stations)
+
+#===
 
 #point in polygon, tram stations in LSOAs
 stations_in_LSOA <- st_join(tram_stations, manchester_lsoa)

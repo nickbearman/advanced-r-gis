@@ -132,26 +132,28 @@ This gives us the Moran's I statistic, as well as some associated variables. It 
 
 *Very recently, there is now a R library that allows us to do some of the GeoDa analysis in R - have a look at https://geodacenter.github.io/rgeoda/.*
 
-# Practical 2: Mapping and R/RStudio Recap
+# Practical 2: Spatial Decision Making
 
-We are going to be looking at a range of data for Greater Manchester and we'll be using both RStudio and GeoDa. 
+We are going to be looking at a range of data for the tram system in Greater Manchester using spatial joins and spatial overlays RStudio. 
 
-This is a good time to remind you about using scripts (i.e. make sure you use one!). It's also a good idea to use the project facility within RStudio. To do this, open RStudio, click **File > New Project...**. Then click **New Directory > Empty Project**, select a folder (e.g. Documents) and then type a new folder name where the project will be saved. Finally click **Create Project**. This will be your working directory. 
+Now is a good time to remind you about using scripts (i.e. make sure you use one!). It's also a good idea to use the project facility within RStudio. To do this, open RStudio, click **File > New Project...**. Then click **New Directory > Empty Project**, select a folder (e.g. Documents) and then type a new folder name where the project will be saved. Finally click **Create Project**. This will be your working directory. Projects allow RStudio to keep related files (e.g. scripts) together. 
 
 ### Plotting maps using `sf`
 
-First, let's load the libraries we need. 
+First, we are going to plot our data. This is a quick recap from previous work, but it is worth doing. Let's load the libraries we need. 
 
 ```{r, message=FALSE, display=FALSE, comment = NA, display = FALSE}
 library(sf)
 library(tmap)
 ```
 
+We are also going to be using data from `tram.zip`. Download and extract the data into your working directory. 
+
 Next, read in some data and plot the data.
 
 ```{r, message=FALSE, display=FALSE, comment=NA, warning=FALSE, results='hide'}
-#read in data (download from OneDrive)
-  manchester_lsoa <- st_read("GreaterManchester_lsoa_2011.shp")
+#read in data
+  manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
   
 ```
 
@@ -160,206 +162,92 @@ Next, read in some data and plot the data.
   qtm(manchester_lsoa)
 ```
 
-Each LSOA has a code and a name, we are looking at a range of IMD values; we need to join the spatial data to the attribute data. Download the IMD data from **http://bit.ly/2kFAlex** (or https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/467774/File_7_ID_2015_All_ranks__deciles_and_scores_for_the_Indices_of_Deprivation__and_population_denominators.csv). This file contains the IMD data for 2015 for all LSOAs in England.
+Also, checkout what attributes we have in the data:
+
+```{r, message=FALSE, display=FALSE, comment=NA, warning=FALSE}
+  head(manchester_lsoa)
+```
+
+We have a selection of different columns here. Of particular note are the `IMDscor`, `IMDrank` and `IMD decl` columns - containing IMD data (score, rank and decile). We also have the total number of people in each LSOA (`AllUslR`) and the population in a range of age groups. The age data we have used before - see [Introduction to Spatial Data & Using R as a GIS](https://github.com/nickbearman/intro-r-spatial-analysis) course for details.  
+
+The IMD data is new. This is the Index of Multiple Deprivation, and consists of a measure of deprivation for each LSOA. <!-- More details on IMD --> 
 
 *There are 3 measures in this data - the IMD score, rank and decile. We will primarily be using the score, where the area with the highest score is the most deprived (with a rank of 1 and in the first decile).*
 
-Download the CSV file to your working directory, rename it to something more sensible like `imd.csv` and read it in:
-
-*Renaming files with long names to a much shorter file name is a good way of avoiding typos.*
-
-```{r, echo=FALSE, eval=FALSE}
-imd <- read.csv("File_7_ID_2015_All_ranks__deciles_and_scores_for_the_Indices_of_Deprivation__and_population_denominators.csv", header = TRUE)
-```
-
-```{r, eval=TRUE}
-imd <- read.csv("imd.csv", header = TRUE)
-```
-
-Using `head(imd)` we can see some of the field names are rather long. Shorten them in RStudio (using the code below). For the moment we only need the IMD Score, Rank and Decile fields. Delete the others and we can always add them back in later if we need them *(this is an advantage of having a well-commented script!)*. 
-
-```{r, comment = NA}
-#delete columns we don't need
-  imd <- imd[,1:7]
-#rename columns
-colnames(imd) <- c("LSOAcode","LSOAname","LADcode","LADname","IMDscore","IMDrank","IMDdecile")
-```
-
-Next, we need to join the data together. 
-
-```{r, comment = NA}
-manchester_lsoa <- merge(manchester_lsoa, imd, by.x="CODE", by.y="LSOAcode")
-```
-
-You should have something like this:
-
-```{r, comment = NA}
-head(manchester_lsoa)
-```
-
-We can also now plot the IMD score across Greater Manchester, using `tmap` (this code should be familiar to you!):
-
-```{r}
-#load library
-  library(tmap)
-#using tmap
-  tm_shape(manchester_lsoa) +
-    tm_polygons("IMDscore", title = "IMD Score", palette = "Blues", style = "jenks") +
-    tm_layout(legend.title.size = 0.8)
-```
-
-### Plotting maps using `sp`
-
-We can also use `sp` instead of `sf`:
-
-First, let's load one of the libraries we need (install it if you don't have it already). 
-
-```{r, message=FALSE, display=FALSE, comment = NA, display = FALSE}
-library(rgdal)
-```
-
-Next, read in some data and plot the data.
-
-```{r, message=FALSE, display=FALSE, comment=NA, warning=FALSE, results='hide'}
-#read in data
-  manchester_lsoa <- readOGR(".", "GreaterManchester_lsoa_2011")
-```
+We can map this data by adapting our mapping code:
 
 ```{r, message=FALSE, display=FALSE, comment=NA, warning=FALSE}
-#plot data
-  plot(manchester_lsoa)
-```
-
-We can use the same `imd.csv` file from earlier:
-
-```{r, echo=FALSE, eval=FALSE}
-imd <- read.csv("File_7_ID_2015_All_ranks__deciles_and_scores_for_the_Indices_of_Deprivation__and_population_denominators.csv", header = TRUE)
-```
-
-```{r, eval=TRUE}
-imd <- read.csv("imd.csv", header = TRUE)
-```
-
-```{r, comment = NA}
-#delete columns we don't need
-  imd <- imd[,1:7]
-#rename columns
-colnames(imd) <- c("LSOAcode","LSOAname","LADcode","LADname","IMDscore","IMDrank","IMDdecile")
-```
-
-Next, we need to join the data together. Note how the code is slightly different:
-
-```{r, comment = NA}
-manchester_lsoa@data <- merge(manchester_lsoa@data,imd,by.x="CODE",by.y="LSOAcode", all.x=TRUE)
-```
-
-You should have something like this:
-
-```{r, comment = NA}
-head(manchester_lsoa@data)
-```
-
-We can also now plot the IMD score across Greater Manchester, using `tmap` (this code should be familiar to you!):
-
-```{r}
-#load library
-  library(tmap)
-#using tmap
-  tm_shape(manchester_lsoa) +
-    tm_polygons("IMDscore", title = "IMD Score", palette = "Blues", style = "jenks") +
-    tm_layout(legend.title.size = 0.8)
-```
-
-**Make sure you are happy with the code you have used. Check the glossary, help in RStudio (`?functionname`) or Google for any functions you have not come across before.**
-
-### Plotting the map using `base` R (optional exercise)
-
-We can also plot the data with the code using the base `plot()` command, not making use of the `tmap` library:
-
-```{r, comment = NA, display = FALSE, message = FALSE, warning=FALSE}
-#load libraries
-  library(maptools)
-  library(classInt)
-  library(RColorBrewer)
-#select variable to map
-  var <- manchester_lsoa@data[,"IMDscore"]
-#set colours & breaks
-  breaks <- classIntervals(var, n = 6, style = "fisher")
-  my_colours <- brewer.pal(6, "Blues")
-#plot map
-  plot(manchester_lsoa, col = my_colours[findInterval(var, breaks$brks, all.inside = TRUE)], 
-       axes = FALSE, border = rgb(0.8,0.8,0.8,0)) 
-  #the 4th parameter in the RGB value is transparency and 
-  #0 means transparent (so we don't get a border at all).
-#draw legend
-  legend(x = 350382, y = 392310, legend = leglabs(breaks$brks), fill = my_colours, 
-         bty = "n", cex = 0.7)
-#add a title
-  title("Greater Manchester: IMD 2015 Score by LSOA")
+tm_shape(manchester_lsoa) +
+  tm_polygons("IMDscor", title = "IMD Score", palette = "Blues", style = "jenks") +
+  tm_layout(legend.title.size = 0.8)
 ```
 
 Now we have a map of IMD by LSOA in Greater Manchester. 
 
 
-
-
-# Practical 3: Spatial Decision Making
+## Public Transport Services
 
 Public transport has an important role to play in tackling deprivation. We can use RStudio to see where the trams in Manchester run and how they relate to deprived areas. 
-
-Firstly, we need to load some libraries (`sf` and `tmap`) and a new one - `dplyr`. Remember to install it if you need to. Then we need to read in and join the LSOA data. 
-
-```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
-library(sf)
-library(tmap)
-library(dplyr)
-#read in manchester LSOA data
-  manchester_lsoa <- st_read("GreaterManchester_lsoa_2011.shp")
-#join IMD data
-  imd <- read.csv("imd.csv", header = TRUE)
-  #delete columns we don't need
-  imd <- imd[,1:7]
-  #rename columns
-  colnames(imd) <- c("LSOAcode","LSOAname","LADcode","LADname","IMDscore","IMDrank","IMDdecile")
-  head(imd)
-  manchester_lsoa <- merge(manchester_lsoa, imd, by.x = "CODE", by.y = "LSOAcode")
-  head(manchester_lsoa)
-```
+We have a selection of tram data available in the `tram.zip` file we downloaded earlier. 
   
-Secondly, load the tramline data, available as a GeoJSON file. This is a different type of file to a shape file and is an XML based format (open it in Notepad if you are interested in how it is structured). `st_read()` can read all sorts of file formats, so we can adapt the code easily.   
+Load the tram line data:
   
 ```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
-  #download data
-  download.file("http://www.nickbearman.me.uk/data/r/tram.zip","tram.zip")
-#unzip
-  unzip("tram.zip")
-#read in tramline data
-  tramlines <- st_read(dsn = "tramlines.geojson")
+# read in tramlines
+  tramlines <- st_read("Metrolink_Lines_Functional.shp")
 ```
 
 We also need the tram stations, which are only available as a CSV file with Eastings and Northings. 
 
 ```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
 #read in CSV with tram station locations
-  tram_stations_CSV <- read.csv("metrolink-stations.csv", header = TRUE)
+  stations_CSV <- read.csv("TfGMMetroRailStops.csv", header = TRUE)
 ```
 
-Read the CSV file in (`metrolink-stations.csv`) and it should look like this:
+Read the CSV file in (`TfGMMetroRailStops.csvv`) and it should look like this:
 
 ```{r, comment=NA}
-head(tram_stations_CSV)
+head(stations_CSV)
+```
+
+This data file actually contains both Railway stations and Tram stations. For this work, we only need the tram station data, so let's create a subset. Have a look at the data:
+
+```{r comment=NA, eval=FALSE}
+View(stations_CSV)
+```
+
+`View()` is a handy function that allows us to view the data in a scrollable window. Very useful for data exploration. Note that there is a column called `NETTYP` which has two values - `M` for Metrolink station and `R` for railway station. 
+
+We can use the `which()` function to select out which rows are metrolink stations:
+
+```{r, comment=NA}
+which(stations_CSV$NETTYP == "M")
+```
+
+However this just gives us a list of numbers - in fact, the index numbers. If we run `stations_CSV[92,]`, it will show us just row 92, a Metrolink station called `Abraham Moss`. 
+
+We can use this to do a subset of the data - select out these ones, and save them as a new variable:
+
+```{r, comment=NA}
+#subset out Metrolink stations
+metrolink_stations_CSV <- stations_CSV[which(stations_CSV$NETTYP == "M"),]
+head(metrolink_stations_CSV)
 ```
 
 We now need to convert this to a `sf` layer, like we did with the crime data in the Introduction course. 
 
-From `head(tram_stations_CSV)`, we can see that the data consists of a number of columns, each with a heading. Two of these are called **X** and **Y**. These are the columns that give the coordinates (Eastings and Northings, as they are in BNG) of each station in the data you have just downloaded. There are also other columns, with various information. At the moment, the data is just in a data frame object - not any kind of spatial object.  To turn it into a spatial layer, enter the following:
+From `head(metrolink_stations_CSV)`, we can see that the data consists of a number of columns, each with a heading. Two of these are called **GMGRFE** and **GMGRFN**. These are the columns that give the coordinates (Eastings, column ending in `E` and Northings, column ending in `N`) in the British National Grid Coordinate Reference System of each station. 
+
+There are also other columns, with various information. At the moment, the data is just in a data frame object - not any kind of spatial object. The numbers in the columns are just numbers. R doesn't know they are coordiantes (and therefore spatial data) until we explicially tell it.
+
+To turn it into a spatial layer, enter the following:
 
 ```{r, comment=NA,warning=FALSE,message=FALSE}
 #make as a sf layer
-tram_stations <- st_as_sf(tram_stations_CSV, coords = c('X', 'Y'), crs = 27700)
+tram_stations <- st_as_sf(metrolink_stations_CSV, coords = c('GMGRFE', 'GMGRFN'), crs = 27700)
 ```
 
-This function `st_as_sf() is a generic function allowing us to create `sf` objects. In this case it takes the `tram_stations_CSV` variable, extracts the coodinates `coords = c('X', 'Y')` and sets the CRS to British National Grid ` crs = 27700`. 
+This function `st_as_sf() is a generic function allowing us to create `sf` objects. In this case it takes the `metrolink_stations_CSV` variable, extracts the coodinates `coords = c('GMGRFE', 'GMGRFN')` and sets the CRS to British National Grid ` crs = 27700`. 
 
 Try `head(tram_stations)` to see the attribute table, similar to earlier. 
 
@@ -369,6 +257,11 @@ We can also plot the data, on top of the Greater Manchester LSOAs.
 #plot just tram stations
 tm_shape(tram_stations) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") 
+#plot tram stations and tram lines, for context
+tm_shape(tram_stations) +
+  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+tm_shape(tramlines) +
+  tm_lines(col = "black")
 #plot tram stations and LSOAs
 tm_shape(tram_stations) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") + 
@@ -376,6 +269,12 @@ tm_shape(tram_stations) +
   tm_borders()
 
 ```
+
+## IMD of Tram Station Catchment Areas
+
+Now we know where the tram stations are, and we can overlay that with the LSOA data. 
+
+<!-- === -->
 
 We can see what the deprivation level is at each tram station, using a point in polygon analysis. The points are the tram stations and the polygons are the LSOAs. 
 
@@ -599,6 +498,19 @@ We now have the average deprivation for each tram stop. **How is this different 
 ## Future Developments (optional exercise)
 
 We can extend this principle to look at groups of tram stops (either using just the stop location, or the buffer approach. For example, let's say there are some prospective new tram routes which could be built (see `future_tramlines` and `future_tramstops`).
+
+Secondly, load the tramline data, available as a GeoJSON file. This is a different type of file to a shape file and is an XML based format (open it in Notepad if you are interested in how it is structured). `st_read()` can read all sorts of file formats, so we can adapt the code easily.   
+  
+```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
+  #download data
+  download.file("http://www.nickbearman.me.uk/data/r/tram.zip","tram.zip")
+#unzip
+  unzip("tram.zip")
+#read in tramline data
+  tramlines <- st_read(dsn = "tramlines.geojson")
+```
+
+future_tramlines.geojson
 
 We need to decide which route is the most important. For this exercise we are going to say that the route that gives access to the most deprived area(s) will be our recommended route (obviously there are many other factors that could be involved!). 
 
