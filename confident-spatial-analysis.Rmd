@@ -272,7 +272,7 @@ tm_shape(tram_stations) +
 
 ## IMD of Tram Station Catchment Areas
 
-Now we know where the tram stations are, and we can overlay that with the LSOA data. 
+Now we know where the tram stations are, and we can overlay that with the LSOA data as we showed in the previous map. 
 
 <!-- === -->
 
@@ -287,40 +287,39 @@ stations_in_LSOA %>% View()
 # the %>% (known as a pipe) is a piece of code from the tidyverse
 ```
 
-At the moment, we have just picked one tram stations for reach LSOA. Most LSOAs only have one tram station in them, so this isn't a problem. However some LSOAs have more than on tram station in them. We can see this by counting how many tram stations are in each LSOA:
+At the moment, we have just picked one tram stations for each LSOA. Most LSOAs only have one tram station in them, so this isn't a problem. 
 
-```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
-#count stations in LSOA
-stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), LSOAname) %>%
-  print()
-```
-
-This will output the data to the console. If we want it in a view tab, do this:
-
-```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
-#count stations in LSOA
-stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), LSOAname) %>%
-  View()
-```
-
-Have a look in `stations_in_LSOA` for the LSOA `Trafford 004D` - you can see it is listed twice. For the moment we are just going to ignore this - but it is an issue with our analysis, and we will come back to it layer on.
-
-Using the pipe `%>%` doesn't actually save the variable - it temporarily creates it and sends it to the `View()` function (in our case). However we need to use `stations_in_LSOA_count` later, so make sure you create it:
+However some LSOAs will have more than one tram station in them. We can see this by counting how many tram stations are in each LSOA:
 
 ```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
 #count stations in LSOA
 stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), LSOAname)
 ```
 
-## Reordering data
+The easiest way to view this is to open it in a `View()` tab:
+
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE,eval=FALSE}
+View(stations_in_LSOA_count)
+```
+
+We can then also sort the columns - click on the arrows (IMG) by the **n** column. You can see several LSOAs have more than one tram station within them, e.g. Manchester 054C. 
+
+If you look for Manchester 054C in the `stations_in_LSOA` variable - again, easiest in a `View()` tab and reorder the data - then you can see the LSOA Manchester 054C is listed three times, against each tram station it is in: **Exchange Square, Market Street and Victoria**. 
+
+This is not a specific problem with our analysis - so we are fine to carry on - but we will come back to this later on. 
+
+
+## Showing Most and Least Deprived Stations
+
+So how do we show the stations with the most and least depirved catchment areas on the map? When reordering bits in the View() tab is useful for exploring, this isn't saved. We can use a different function to do this. 
 
 There is an `order()` function in R that allows us to reorder data. This is particularly useful if we want to display the 10 most and 10 least deprived stations! This code below creates a new variable with the data in a different order.
 
 ```{r, comment = NA}
-stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscore, decreasing = TRUE), ]
+stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscor, decreasing = TRUE), ]
 ```
 
-We can then plot the top and bottom 10 stations:
+We can then plot the top and bottom 10 stations. Note that there are 99 stations in our data frame, so `[1:10,]` gives us the top ten (most deprived) and `[89:99,]` will give us the bottom tem (least deprived):
 
 ```{r, comment = NA}
 #stations
@@ -332,7 +331,7 @@ tm_shape(stations_in_LSOA) +
   tm_dots(size = 0.1, shape = 19, col = "darkred") +
   tm_shape(stations_in_LSOA[1:10,]) +
   tm_dots(size = 0.1, shape = 19, col = "red") +
-  tm_shape(stations_in_LSOA[82:92,]) +
+  tm_shape(stations_in_LSOA[89:99,]) +
   tm_dots(size = 0.1, shape = 19, col = "blue") 
 ```
   
@@ -342,7 +341,7 @@ So, which tram stop is the most deprived? and which is the least deprived?
 #most deprived
 stations_in_LSOA[1,]
 #least deprived
-stations_in_LSOA[92,]
+stations_in_LSOA[99,]
 ```
 
 <!-- DROPPED STILL SP
@@ -383,12 +382,19 @@ We can then repeat the process of working out which train station is the most an
 
 
 -->
-
+ <!-- === -->
+ 
 ## Tram Stop Buffers
 
-Currently we have been looking at just the LSOA each tram stop is within. However we could look at the LSOAs that are within a set distance (for example a 15 minute walk) of each tram stop. Why do you think we might we want to do this?
+Currently we have been looking at just the LSOA each tram stop is within. However if we overlay each tram stop (as a point) we can see that assuming that people come from the LSOA it is in might not be a good idea. 
 
-For this, we need to use a buffer - a circle of a set distance around each tram stop. At a speed of 3 mph, this is equal to about 1.2km. We can use the `st_buffer` function. 
+<!-- add example --> 
+
+we could look at the LSOAs that are within a set distance (for example a 15 minute walk) of each tram stop. Why do you think we might we want to do this?
+
+<!-- Some LSOAs are quite small, and people from nearby LSOAs might use that tram stop as well. -->
+
+To look at the LSOAs within a set distance, we can use a tool called a buffer. This creates a circle at a set distance around a point. So how big a buffer should we create? How far are people likley to walk to get to their nearest tram stop? Let's say people will talk for 10 min. At a speed of 3 mph, this is equal to about 1.2km. We can use the `st_buffer` function to generate a buffer of 1.2km (1200 m). 
 
 ```{r, comment = NA}
 #plot the tram stations
@@ -399,7 +405,22 @@ For this, we need to use a buffer - a circle of a set distance around each tram 
   qtm(tram_stations_1200_buffer)
 ```
 
-We now have the buffers (the circles) for each tram station. There are a number of different ways we can look at how the buffers and LSOAs relate to one another. We are going to look at a quite simple approach - convert the LSOAs to points and for each buffer take the average deprivation level of the LSOAs within the buffer. 
+We now have the buffers (the circles) for each tram station. 
+
+```{r, comment = NA}
+# overlay one tram stop and the LSOAs
+#plot the buffer, lsoas and tram stations
+  tm_shape(tram_stations_1200_buffer[4,]) +
+    tm_polygons() +
+  tm_shape(manchester_lsoa) +
+    tm_polygons(alpha=0.1) +
+  tm_shape(tram_stations[4,]) +
+    tm_dots()
+```
+
+See how our 1.2km buffer around a tram station covers a number of different LSOAs. Additionally some LSOAs are completely covered, and some are only partially covered. 
+
+There are a number of different ways we can look at how the buffers and LSOAs relate to one another. We are going to look at a quite simple approach - convert the LSOAs to points and for each buffer use a point in polygon analysis to take the average deprivation level of the LSOAs (points) within the buffer. 
 
 **There are a number of limitations with this method and this is something to think about as you work through this process: how could you do the analysis differently in the future?**
 
@@ -429,8 +450,12 @@ Now we have the train stations buffers as polygons and the LSOAs as points (as s
 #map of one station buffer with LSOA points in it
 tm_shape(tram_stations_1200_buffer[1,]) +
   tm_borders(col = "red") +
-  tm_shape(manchester_lsoa_points) +
-  tm_dots(manchester_lsoa_points, size = 0.1, shape = 19, col = "darkred") 
+tm_shape(tram_stations[1,]) +
+  tm_dots(size = 0.5) +
+tm_shape(manchester_lsoa_points) +
+  tm_dots(manchester_lsoa_points, size = 0.1, shape = 19, col = "darkred") +
+tm_shape(manchester_lsoa) +
+  tm_polygons(alpha=0.1)
 ```
 
 However, to link the two we need to do a spatial join. This is similar to what we did earlier. 

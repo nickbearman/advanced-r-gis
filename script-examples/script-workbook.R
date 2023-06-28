@@ -55,16 +55,20 @@ tm_shape(tram_stations) +
 
 qtm(tram_stations)
 
-#===
+
+## IMD of Tram Station Catchment Areas
+
+
 
 #point in polygon, tram stations in LSOAs
 stations_in_LSOA <- st_join(tram_stations, manchester_lsoa)
+head(stations_in_LSOA)
 
-stations_in_LSOA %>% View()
+library(dplyr)
 
 #count stations in LSOA
-stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), LSOAname) %>%
-  print()
+stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), NAME) %>%
+  View()
 
 
 #examine one feature
@@ -73,10 +77,14 @@ stations_in_LSOA[1,]
 class(stations_in_LSOA)
 qtm(stations_in_LSOA)
 
-#reorder
-stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscore, decreasing = TRUE), ]
+#===
 
-View(stations_in_LSOA)
+## Showing most and least deprived areas. 
+
+#reorder
+stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscor, decreasing = TRUE), ]
+
+head(stations_in_LSOA)
 
 #stations
 tm_shape(stations_in_LSOA) +
@@ -87,12 +95,13 @@ tm_shape(stations_in_LSOA) +
   tm_dots(size = 0.1, shape = 19, col = "darkred") +
   tm_shape(stations_in_LSOA[1:10,]) +
   tm_dots(size = 0.1, shape = 19, col = "red") +
-  tm_shape(stations_in_LSOA[82:92,]) +
+  tm_shape(stations_in_LSOA[89:99,]) +
   tm_dots(size = 0.1, shape = 19, col = "blue") 
 
 # to page 13 ( 1 to 1 join)
 
 ##Tram Stop Buffers
+
 #taking average IMD score for catchment area
 # point to polygon - buffer etc. 
 
