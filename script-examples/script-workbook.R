@@ -1,3 +1,60 @@
+# Practical 1: Spatial Analysis
+## LISA in R (optional exercise)
+
+# based on https://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html
+
+# install.packages("rgeoda")
+library(rgeoda)
+library(sf)
+
+#read in shapefile
+manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
+
+# Calculate Spatial Weights
+queen_w <- queen_weights(manchester_lsoa)
+summary(queen_w)
+
+# To access the details of the weights: e.g. list the neighbors of a specified observation:
+  
+nbrs <- get_neighbors(queen_w, idx = 1)
+cat("\nNeighbors of the 1-st observation are:", nbrs)
+
+# Calculating Local Indicators of Spatial Association–LISA
+# Local Moran
+
+manchester_IMD <- manchester_lsoa["IMDscor"]
+lisa <- local_moran(queen_w, manchester_IMD)
+
+#we can access different bits of the calcuations:
+
+lms <- lisa_values(gda_lisa = lisa)
+lms
+
+pvals <- lisa_pvalues(lisa)
+pvals
+
+cats <- lisa_clusters(lisa, cutoff = 0.05)
+cats
+
+lbls <- lisa_labels(lisa)
+lbls
+
+#join labels on
+
+manchester_lsoa$lisaCats <- cats
+head(manchester_lsoa)
+
+qtm(manchester_lsoa, fill = "lisaCats")
+
+lisa_colors <- lisa_colors(lisa)
+lisa_labels <- lisa_labels(lisa)
+
+tm_shape(manchester_lsoa) + 
+  tm_polygons("lisaCats", palette = lisa_colors[1:5], labels = lisa_labels[1:5])
+
+# for more information on the mapping, see https://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html#exploratory-spatial-data-analysis
+
+
 # Practical 2: Spatial Decision Making
 # sf version - older sp version available in script-workbook-sp.R
 

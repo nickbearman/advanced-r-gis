@@ -18,9 +18,10 @@ Learning Outcomes: | R Functions & Libraries:
 -------- | --------  
 Understand Linked Displays in GeoDa  |  *brushing* (pg. 1)  
 Perform Local Indicators of Spatial Association | *LISA* (pg. 3)   
-Understand how to read in a variety of formats | `st_read()` (pg. 6)  
-Know how to reorder data | `order()` (pg. 16) 
-Know how to use buffers within R  | `st_buffer()` (pg. 19)   
+Understand how to read in a variety of formats | `st_read()` (pg. 8)  
+Perform a spatial join | `st_join()` (pg. 14)
+Know how to reorder data | `order()` (pg. 15) 
+Know how to use buffers within R  | `st_buffer()` (pg. 17)   
 <!-- Understand creating and using functions within R | `function ()` (pg. 13)  -->  
 <!-- Tables have a max line length, if it is too long, the table gets shrunk -->
 
@@ -31,20 +32,20 @@ We are going to be performing some Exploratory Data Analysis using a program cal
 
 For the analysis, we are interested in the deprivation levels. First of all, let's have a look at the data in a program called GeoDa.
 
-Download the data from http://bit.ly/csaprac1 or OneDrive (GreaterManchester_lsoa_2011_imd.zip) and extract the zip file. 
+Download the `tramp.zip` data the website and extract the zip file. 
 
 - Click **Start > GeoDa** 
 - When GeoDa opens, click on the folder icon 
 - Select **ESRI Shapefile (.shp)** 
-- Browse to and open **GreaterManchester_lsoa_2011_imd.shp** 
+- Browse to and open **lsoa_manchester_age_imd.shp** 
 
 ![](images/geoda-file-open-shape-file.png){ height=30% }
 
 
 
-GeoDa should open a map display of the data automatically. We can create a simple choropleth map in here by right clicking on the map and then select **Change Current Map Type**. Select **Natural Breaks > 5** and choose the variable to map (we want **IMDscore**). Then a classified map will appear, similar to one we have created in RStudio. 
+GeoDa should open a map display of the data automatically. We can create a simple choropleth map in here by right clicking on the map and then select **Change Current Map Type**. Select **Natural Breaks > 5** and choose the variable to map (we want **IMDscor**). Then a classified map will appear, similar to one we have created in RStudio. 
 
-Also open the attribute table ![Attribute Table](images/attribute-table.png){ height=20 } and a histogram ![Histogram](images/histogram.png){ height=20 } for `IMDscore`. GeoDa allows us to use brushing or linked displays. Select one of the larger bars in the histogram and you will see that the same entries are highlighted on the map and in the attribute table. You can also draw a box on the map (left-click and drag) and that will highlight the entries as well (you can drag the box around). 
+Also open the attribute table ![Attribute Table](images/attribute-table.png){ height=20 } and a histogram ![Histogram](images/histogram.png){ height=20 } for `IMDscor`. GeoDa allows us to use brushing or linked displays. Select one of the larger bars in the histogram and you will see that the same entries are highlighted on the map and in the attribute table. You can also draw a box on the map (left-click and drag) and that will highlight the entries as well (you can drag the box around). 
 
 *How is this different to interacting with the data in RStudio, or QGIS/ArcGIS if you have used those packages? Is it better / easier to use? Or harder to use?*
 
@@ -56,23 +57,23 @@ Select **Tools > Weights Manager** and click **Create**.  The following screen i
 
 - Select **Add ID Variable...** and accept the default name.  
 - You now need to choose the neighbourhood weight method.  Select **Queen Contiguity** and click **Create**.  
-- The neighbourhood weight matrix is saved in a file.  A suggested name is given.  This is the LSOA shape file name with a suffix of .gal.  Select **Save** and after a few seconds you should see a message **Weights file `GreaterManchester_lsoa_2011_IMD.gal` created successfully**.  
+- The neighbourhood weight matrix is saved in a file.  A suggested name is given.  This is the LSOA shape file name with a suffix of .gal.  Select **Save** and after a few seconds you should see a message **Weights file `lsoa_manchester_age_imd.gal` created successfully**.  
 - Click **OK** on this window and **Close** on the Weights File Creation window. The Weights Manager window should show the details of the neighbours you have just selected. 
 
 Click ![](images/histogram-button.png){ height=20 } and you can see how many neighbours each polygon has. In my data, five is the most common number of neighbours. Close this and open the **Connectivity Map**, which shows the neighbours for each polygon. Close this and the Weights Manager when you are happy with it. 
 
 ## Moran's I
 
-We can now start to explore the spatial patterns of the model we want to develop.  Click on the **Space** item on the GeoDa menu.  First we are going to look at the global indicator of spatial autocorrelation.  Select the first menu item **Univariate Moran's I**.  A list of variables is displayed.  Choose the `IMDscore` variable.  Select the weights file we created earlier. 
+We can now start to explore the spatial patterns of the model we want to develop.  Click on the **Space** item on the GeoDa menu.  First we are going to look at the global indicator of spatial autocorrelation.  Select the first menu item **Univariate Moran's I**.  A list of variables is displayed.  Choose the `IMDscor` variable.  Select the weights file we created earlier. 
 
 ![](images/morans-i.png){ height=40% }
 
-A new window opens with a scatterplot of the IMDscore variable and the lagged IMDscore variable.  The lagged IMDscore variable is the value of the IMD Score for the selected neighbourhood and its neighbours as defined when we set the spatial weights.  The scatter-plot suggests a positive correlation between the variables.  This means that there is a weak positive spatial autocorrelation. It has a value of 0.253 confirming this positive spatial autocorrelation. We will now look at the local indicators of spatial association.  
+A new window opens with a scatterplot of the IMDscor variable and the lagged IMDscor variable.  The lagged IMDscor variable is the value of the IMD Score for the selected neighbourhood and its neighbours as defined when we set the spatial weights.  The scatter-plot suggests a positive correlation between the variables.  This means that there is a weak positive spatial autocorrelation. It has a value of 0.253 confirming this positive spatial autocorrelation. We will now look at the local indicators of spatial association.  
 
 ## Local Indicators of Spatial Association (LISA)
 
 - Select **Space > Univariate Local Moran's I**. 
-- Select the `IMDscore` variable from the list displayed and select the weights file used earlier (it should be selected automatically). 
+- Select the `IMDscor` variable from the list displayed and select the weights file used earlier (it should be selected automatically). 
 - A screen with three checkboxes is shown.  Check all three and click **OK**.  A number of windows are produced. 
 - The scatterplot is the same as we produced in the previous section. The two maps shown below are produced.  You will probably need to expand them to full screen to see the legends and patterns displayed. 
 
@@ -98,39 +99,113 @@ Right click on the map and choose **Save Results**. Tick all three boxes (to sav
 
 Open the attribute table within GeoDa ![](images/attribute-table.png){ height=20 } and you can see the three new variables on the right hand side of the table. Click the Save button ![](images/save.png){ height=20 } to save the updated shapefile. 
 
-## Moran's I in R (optional exercise)
+## LISA in R (optional exercise)
 
-We can also perform the same analysis in R. Load this shapefile back into RStudio. We need to use the `SP` library for these commands.  
+There is a library for R, that allows us to do many of the GeoDa analyses inside R. It is called `rgeoda` and more details are at: 
+https://geodacenter.github.io/rgeoda/. There is also a very good tutorial at https://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html which I'd recommend if you are interested in more details. 
+
+To mirror the LISA analysis we did in GeoDa, load the libraries. Remember to install the `rgeoda` package if you need to: 
 
 ```{r, message=FALSE, warning=FALSE, comment=NA, display=FALSE, results='hide'}
-#load library
-  library(rgdal)
-#read in file
-  GreaterManchester_lsoa_2011_imd <- readOGR(".", "GreaterManchester_lsoa_2011_imd")
+library(rgeoda)
+library(sf)
+library(tmap)
 ```
 
-Your data should look like this:
+Load the `lsoa_manchester_age_imd.shp` file from the `trams.zip` file:
 
-```{r, comment = NA}
-head(GreaterManchester_lsoa_2011_imd@data)
+
+```{r}
+#read in shapefile
+manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
 ```
 
-To do the Moran's I analysis, we need another library:
+Calculate the spatial weights: We are using Queen weights by default, but there are also many other options. 
 
-```{r, comment=NA, message=FALSE, display=FALSE, warning = FALSE}
-#load the library
-  library(spdep)
-#work out the neighbours
-  GreaterManchester_lsoa_nb <- poly2nb(GreaterManchester_lsoa_2011_imd)
-#reformat the list of neighbours to a weight matrix
-  GreaterManchester_lsoa_lw <- nb2listw(GreaterManchester_lsoa_nb)
-#run the test
-  moran.test(GreaterManchester_lsoa_2011_imd@data$IMDscore, GreaterManchester_lsoa_lw)
+```{r}
+# Calculate Spatial Weights
+queen_w <- queen_weights(manchester_lsoa)
+summary(queen_w)
 ```
 
-This gives us the Moran's I statistic, as well as some associated variables. It is possible to run a whole range of analysis, which goes beyond the scope of this course. 
+If we want to, we can intergrate the neighbours of a specific polygon:
 
-*Very recently, there is now a R library that allows us to do some of the GeoDa analysis in R - have a look at https://geodacenter.github.io/rgeoda/.*
+
+```{r}
+# To access the details of the weights: e.g. list the neighbors of a specified observation:
+nbrs <- get_neighbors(queen_w, idx = 1)
+cat("\nNeighbors of the 1-st observation are:", nbrs)
+```
+
+We can also perform our LISA calcuation. We need to extract the column we want to use (`IMDscor`) and then use that with the existing weights variable:
+
+```{r}
+# Calculating Local Indicators of Spatial Association–LISA
+# Local Moran
+
+manchester_IMD <- manchester_lsoa["IMDscor"]
+lisa <- local_moran(queen_w, manchester_IMD)
+```
+
+This `lisa` object contains all of the results, and we can access them using a number of commands:
+
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
+#Get the values of the local Moran's I
+lms <- lisa_values(gda_lisa = lisa)
+```
+
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE,eval=FALSE}
+lms
+```
+
+I think these are the input values for creating a Moran's I graph like we did in GeoDa, but I don't think we can currently do this using the `rgeoda` library. Let me know if you discover a way of doing this! See *Morans I in R* for an example of this using the `sp` libray. 
+
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
+#get the pseudo-p values of significance of local Moran computation, the green signifiance map
+pvals <- lisa_pvalues(lisa)
+```
+
+```{r, eval=FALSE}
+pvals
+```
+
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
+#get the cluster indicators of local Moran computation, the blue-red map values
+cats <- lisa_clusters(lisa, cutoff = 0.05)
+```
+
+```{r, eval=FALSE}
+cats
+```
+
+These are stored as values of `0` to `4`, accessible through:
+
+```{r}
+lbls <- lisa_labels(lisa)
+lbls
+```
+*Formally, there are also values `5` and `6` althgouh they are rarley used, and not present in our data for Greater Manchester.* 
+
+We can also then map our data:
+
+```{r}
+#join labels on to the data
+  manchester_lsoa$lisaCats <- cats
+  head(manchester_lsoa)
+
+# access colours and labels
+  lisa_colors <- lisa_colors(lisa)
+  lisa_labels <- lisa_labels(lisa)
+
+#draw map
+  tm_shape(manchester_lsoa) + 
+    tm_polygons("lisaCats", palette = lisa_colors[1:5], labels = lisa_labels[1:5])
+```
+We have restricted the colours and labels to the first five (`[1:5]`) because we do not need numbers `6` and `7` for this data. 
+
+For more information on the mapping, see ttps://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html#exploratory-spatial-data-analysis. 
+
+\newpage
 
 # Practical 2: Spatial Decision Making
 
