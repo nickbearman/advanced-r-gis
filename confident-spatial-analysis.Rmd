@@ -197,14 +197,14 @@ Load the tram line data:
   tramlines <- st_read("Metrolink_Lines_Functional.shp")
 ```
 
-We also need the tram stations, which are only available as a CSV file with Eastings and Northings. 
+We also need the tram stations, which are only available as a CSV file with Eastings and Northings:
 
 ```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
 #read in CSV with tram station locations
   stations_CSV <- read.csv("TfGMMetroRailStops.csv", header = TRUE)
 ```
 
-Read the CSV file in (`TfGMMetroRailStops.csvv`) and it should look like this:
+It should look like this:
 
 ```{r, comment=NA}
 head(stations_CSV)
@@ -283,17 +283,19 @@ We can see what the deprivation level is at each tram station, using a point in 
 stations_in_LSOA <- st_join(tram_stations, manchester_lsoa)
 
 #view the data
-stations_in_LSOA %>% View()
-# the %>% (known as a pipe) is a piece of code from the tidyverse
+View(stations_in_LSOA)
 ```
 
 At the moment, we have just picked one tram stations for each LSOA. Most LSOAs only have one tram station in them, so this isn't a problem. 
 
-However some LSOAs will have more than one tram station in them. We can see this by counting how many tram stations are in each LSOA:
+However some LSOAs will have more than one tram station in them. We can see this by counting how many tram stations are in each LSOA: 
+
+*We will need to use the `dplyr` library for this - make sure you install it if you haven't got it already*
 
 ```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
 #count stations in LSOA
-stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), LSOAname)
+library(dplyr)
+stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), NAME)
 ```
 
 The easiest way to view this is to open it in a `View()` tab:
@@ -311,7 +313,7 @@ This is not a specific problem with our analysis - so we are fine to carry on - 
 
 ## Showing Most and Least Deprived Stations
 
-So how do we show the stations with the most and least depirved catchment areas on the map? When reordering bits in the View() tab is useful for exploring, this isn't saved. We can use a different function to do this. 
+So how do we show the stations with the most and least depirved catchment areas on the map? When reordering bits in the `View()` tab is useful for exploring, this isn't saved. We can use a different function to do this. 
 
 There is an `order()` function in R that allows us to reorder data. This is particularly useful if we want to display the 10 most and 10 least deprived stations! This code below creates a new variable with the data in a different order.
 
@@ -322,7 +324,7 @@ stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscor, decreasing 
 We can then plot the top and bottom 10 stations. Note that there are 99 stations in our data frame, so `[1:10,]` gives us the top ten (most deprived) and `[89:99,]` will give us the bottom tem (least deprived):
 
 ```{r, comment = NA}
-#stations
+#plot stations
 tm_shape(stations_in_LSOA) +
   tm_dots(stations_in_LSOA, size = 0.1, shape = 19, col = "darkred") 
 
@@ -471,11 +473,13 @@ Each station (`tram_stations_1200_buffer`) is listed multiple times - one for ea
 
 ```{r, comment = NA}
 #group by Station, take average IMDscore. 
-  station_LSOA_IMD <- tram_stations_IMD %>% group_by(Label_Text) %>% summarise(mean(IMDscore)) 
+  station_LSOA_IMD <- tram_stations_IMD %>% group_by(RSTNAM) %>% summarise(mean(IMDscor)) 
 #view the average IMD score for each station
 View(station_LSOA_IMD)
 qtm(station_LSOA_IMD)
 ```
+
+The `%>%` command (known as a pipe) is a piece of code from the tidyverse. It allows you to pass the output from one function in to another function. This is sometimes known as chaining commands together. Here, we take `tram_stations_IMD`, pass it to `group_by(RSTNAM)` and then pass on to `summarise(mean(IMDscor))`. 
 
 Now we have each station buffer listed once, with the average IMD score (`mean(IMDscore)`). Currently they are still the buffers, which won't make sense to map, so we can convert them back to points (centriods):
 
@@ -498,7 +502,7 @@ We can then reorder them, and map them according to the IMD:
 
 ```{r, comment = NA}
 #reorder, most deprived at the top
-station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`mean(IMDscore)`, 
+station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`mean(IMDscor)`, 
             decreasing = TRUE), ]
 
 head(station_LSOA_IMD_pt_ordered)
@@ -508,39 +512,79 @@ tm_shape(station_LSOA_IMD_pt_ordered) +
   tm_dots(station_LSOA_IMD_pt_ordered, size = 0.1, shape = 19, col = "darkred") +
   tm_shape(station_LSOA_IMD_pt_ordered[1:10,]) +
   tm_dots(station_LSOA_IMD_pt_ordered[1:10,], size = 0.1, shape = 19, col = "red") +
-  tm_shape(station_LSOA_IMD_pt_ordered[81:91,]) +
-  tm_dots(station_LSOA_IMD_pt_ordered[81:91,], size = 0.1, shape = 19, col = "blue") 
+  tm_shape(station_LSOA_IMD_pt_ordered[89:99,]) +
+  tm_dots(station_LSOA_IMD_pt_ordered[89:99,], size = 0.1, shape = 19, col = "blue") 
 ```
 
 
-We now have the average deprivation for each tram stop. **How is this different to our previous measure? What are the limitations?** 
+We now have the average deprivation for each tram stop. **How is this different to our previous measure?** 
+
+<!-- show side by side: 
+
+tm_shape(stations_in_LSOA) +
+  tm_dots(size = 0.1, shape = 19, col = "darkred") +
+  tm_shape(stations_in_LSOA[1:10,]) +
+  tm_dots(size = 0.1, shape = 19, col = "red") +
+  tm_shape(stations_in_LSOA[89:99,]) +
+  tm_dots(size = 0.1, shape = 19, col = "blue") 
+
+tm_shape(station_LSOA_IMD_pt_ordered) +
+  tm_dots(station_LSOA_IMD_pt_ordered, size = 0.1, shape = 19, col = "darkred") +
+  tm_shape(station_LSOA_IMD_pt_ordered[1:10,]) +
+  tm_dots(station_LSOA_IMD_pt_ordered[1:10,], size = 0.1, shape = 19, col = "red") +
+  tm_shape(station_LSOA_IMD_pt_ordered[89:99,]) +
+  tm_dots(station_LSOA_IMD_pt_ordered[89:99,], size = 0.1, shape = 19, col = "blue") 
+
+-->
   
 - Discuss your results with a neighbour. How could the deprivation be calculated differently? 
-- Try running the analysis with a different buffer. How easy is this within R compared to another GIS? 
-- How about doing a polygon polygon overlay? How easy is this in R compared to another GIS? *See http://gis.stackexchange.com/questions/140504/extracting-intersection-areas-in-r for some interesting suggestions.*
+- Try running the analysis with a different buffer. How easy is this within R to change the buffer to 1km (1000m) compared to another GIS? 
 
 
-## Future Developments (optional exercise)
+## Future Tram Expansion (optional exercise)
 
-We can extend this principle to look at groups of tram stops (either using just the stop location, or the buffer approach. For example, let's say there are some prospective new tram routes which could be built (see `future_tramlines` and `future_tramstops`).
+We can extend this principle to look at groups of tram stops (either using just the stop location, or the buffer approach. For example, let's say there are some prospective new tram routes which could be built (see `future_tramlines.geojson` and `future_tramstops.shp`).
 
-Secondly, load the tramline data, available as a GeoJSON file. This is a different type of file to a shape file and is an XML based format (open it in Notepad if you are interested in how it is structured). `st_read()` can read all sorts of file formats, so we can adapt the code easily.   
+Load the `future_tramlines.geojson`, which is available as a GeoJSON file. This is a different type of file to a shape file and is an XML based format (open it in Notepad if you are interested in how it is structured). `st_read()` can read all sorts of file formats, so we can adapt the code easily.   
   
 ```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
-  #download data
+#download data
   download.file("http://www.nickbearman.me.uk/data/r/tram.zip","tram.zip")
 #unzip
   unzip("tram.zip")
 #read in tramline data
-  tramlines <- st_read(dsn = "tramlines.geojson")
+  future_tramlines <- st_read(dsn = "future_tramlines.geojson")
 ```
 
-future_tramlines.geojson
+When combined with the `future_tramstops.shp` file, we can see we have three different areas for expansion: Stockport Extension, Airport western loop and Port Salford. 
 
-We need to decide which route is the most important. For this exercise we are going to say that the route that gives access to the most deprived area(s) will be our recommended route (obviously there are many other factors that could be involved!). 
+```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
+# read in data
+  future_tramstops <- st_read("future_tramstops.shp")
+# plot data
+tm_shape(future_tramlines) +
+  tm_lines() +
+tm_shape(future_tramstops) +
+  tm_dots(size = 0.1)
+```
+
+
+There is only funding to build one route, and we need to chose which one to build. For this exercise we are going to say that the route that gives access to the most deprived area(s) will be our recommended route (obviously there are many other factors that could be involved!). 
 
 **Analyse the prospective new routes to see which reaches the areas with highest deprivation levels.**
 
+
+## Polygon Polygon Overlay (optional exercise)
+
+When we looked at which LSOAs were in the catchment area, we converted the polygons to points, and then either the LSOA was in the catchment area, or was not in the catchment area. However some LSOAs were only partially in the catchment area. Could we include this in our analysis somehow? 
+
+One potential way is to use a weighted area calculation. This involves calculating the area of the LSOA that is inside the buffer (e.g. 68%) then incorporate this into the overall average using a weighted approach (e.g. 68% of the IMD score for that LSOA).
+
+*This is a very common approached used with population, e.g. if 68% of the LSOA area is within the buffer zone, then it makes sense to assume 68% of the population could make use of the tram station.*
+
+We can extend this to IMD score, with the assumption if 68% of one deprived area is within the tram station catchment area, but 100% of a different area is within the catchment area of a different tram station, it is more important to prioritise the deprived area with 100% coverage than the one with 68% coverage. Therefore a 100% weight is given to one, and only a 68% weight is given to another. 
+
+- How about doing a polygon polygon overlay? How easy is this in R compared to another GIS? *See http://gis.stackexchange.com/questions/140504/extracting-intersection-areas-in-r for some interesting suggestions, particularly using sf at the bottom of the post. The answers are provided in `st_intersection_code.R` if you want to have a look. Try working out the code yourself first though!*
 
 -----
 
