@@ -158,10 +158,10 @@ lms <- lisa_values(gda_lisa = lisa)
 lms
 ```
 
-I think these are the input values for creating a Moran's I graph like we did in GeoDa, but I don't think we can currently do this using the `rgeoda` library. Let me know if you discover a way of doing this! See *Morans I in R* for an example of this using the `sp` libray. 
+I think these are the input values for creating a Moran's I graph like we did in GeoDa, but I don't think we can currently do this using the `rgeoda` library. Let me know if you discover a way of doing this! I have asked the [GeoDa Team](https://github.com/GeoDaCenter/rgeoda/issues/41) but not yet received an answer. See *Moran's I in R* for an example of this using the `sp` library. 
 
 ```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
-#get the pseudo-p values of significance of local Moran computation, the green signifiance map
+#get the pseudo-p values of significance of local Moran computation, the green significance map
 pvals <- lisa_pvalues(lisa)
 ```
 
