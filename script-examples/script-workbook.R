@@ -3,9 +3,12 @@
 
 # based on https://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html
 
+setwd("~/work/confident-spatial-analysis/data-user")
+
 # install.packages("rgeoda")
 library(rgeoda)
 library(sf)
+library(tmap)
 
 #read in shapefile
 manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
@@ -128,7 +131,7 @@ library(tmap)
 
 #count stations in LSOA
   library(dplyr)
-  stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), NAME) %>%
+  stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), NAME)
 
 #View data
   View(stations_in_LSOA_count)
@@ -212,7 +215,7 @@ tm_shape(stations_in_LSOA) +
   View(tram_stations_IMD)
 
 #group by Station, take average IMDscore. 
-  station_LSOA_IMD <- tram_stations_IMD %>% group_by(Label_Text) %>% summarise(mean(IMDscore)) 
+  station_LSOA_IMD <- tram_stations_IMD %>% group_by(RSTNAM) %>% summarise(mean(IMDscor)) 
 
 #view the average IMD score for each station
   View(station_LSOA_IMD)
