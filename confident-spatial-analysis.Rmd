@@ -201,6 +201,7 @@ We can also then map our data:
   tm_shape(manchester_lsoa) + 
     tm_polygons("lisaCats", palette = lisa_colors[1:5], labels = lisa_labels[1:5])
 ```
+
 We have restricted the colours and labels to the first five (`[1:5]`) because we do not need numbers `6` and `7` for this data. 
 
 For more information on the mapping, see https://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html#exploratory-spatial-data-analysis. 
