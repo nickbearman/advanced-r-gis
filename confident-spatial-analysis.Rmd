@@ -2,9 +2,9 @@
 title: "Confident Spatial Analysis and Statistics in R & GeoDa"
 author: "Nick Bearman - Geospatial Training Solutions"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 date: "Thu 4th May 2023"
 ---
 
@@ -68,14 +68,14 @@ We can now start to explore the spatial patterns of the model we want to develop
 
 ![](images/morans-i.png){ height=40% }
 
-A new window opens with a scatterplot of the IMDscor variable and the lagged IMDscor variable.  The lagged IMDscor variable is the value of the IMD Score for the selected neighbourhood and its neighbours as defined when we set the spatial weights.  The scatter-plot suggests a positive correlation between the variables.  This means that there is a weak positive spatial autocorrelation. It has a value of 0.253 confirming this positive spatial autocorrelation. We will now look at the local indicators of spatial association.  
+A new window opens with a scatter plot of the IMDscor variable and the lagged IMDscor variable.  The lagged IMDscor variable is the value of the IMD Score for the selected neighbourhood and its neighbours as defined when we set the spatial weights.  The scatter-plot suggests a positive correlation between the variables.  This means that there is a weak positive spatial autocorrelation. It has a value of 0.253 confirming this positive spatial autocorrelation. We will now look at the local indicators of spatial association.  
 
 ## Local Indicators of Spatial Association (LISA)
 
 - Select **Space > Univariate Local Moran's I**. 
 - Select the `IMDscor` variable from the list displayed and select the weights file used earlier (it should be selected automatically). 
-- A screen with three checkboxes is shown.  Check all three and click **OK**.  A number of windows are produced. 
-- The scatterplot is the same as we produced in the previous section. The two maps shown below are produced.  You will probably need to expand them to full screen to see the legends and patterns displayed. 
+- A screen with three check boxes is shown.  Check all three and click **OK**.  A number of windows are produced. 
+- The scatter plot is the same as we produced in the previous section. The two maps shown below are produced.  You will probably need to expand them to full screen to see the legends and patterns displayed. 
 
 ![](images/lisa.png){ height=35% }
 
@@ -128,16 +128,16 @@ queen_w <- queen_weights(manchester_lsoa)
 summary(queen_w)
 ```
 
-If we want to, we can intergrate the neighbours of a specific polygon:
+If we want to, we can integrate the neighbours of a specific polygon:
 
 
 ```{r}
-# To access the details of the weights: e.g. list the neighbors of a specified observation:
+# To access the details of the weights: e.g. list the neighbours of a specified observation:
 nbrs <- get_neighbors(queen_w, idx = 1)
 cat("\nNeighbors of the 1-st observation are:", nbrs)
 ```
 
-We can also perform our LISA calcuation. We need to extract the column we want to use (`IMDscor`) and then use that with the existing weights variable:
+We can also perform our LISA calculation. We need to extract the column we want to use (`IMDscor`) and then use that with the existing weights variable:
 
 ```{r}
 # Calculating Local Indicators of Spatial Association–LISA
@@ -178,13 +178,13 @@ cats <- lisa_clusters(lisa, cutoff = 0.05)
 cats
 ```
 
-These are stored as values of `0` to `4`, accessible through:
+These are stored as values of `1` to `5`, accessible through:
 
 ```{r}
 lbls <- lisa_labels(lisa)
 lbls
 ```
-*Formally, there are also values `5` and `6` althgouh they are rarley used, and not present in our data for Greater Manchester.* 
+*Formally, there are also values `6 Undefined` and `7 Isolated` although they are rarely used, and not present in our data for Greater Manchester.* 
 
 We can also then map our data:
 
@@ -203,7 +203,7 @@ We can also then map our data:
 ```
 We have restricted the colours and labels to the first five (`[1:5]`) because we do not need numbers `6` and `7` for this data. 
 
-For more information on the mapping, see ttps://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html#exploratory-spatial-data-analysis. 
+For more information on the mapping, see https://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html#exploratory-spatial-data-analysis. 
 
 \newpage
 
@@ -313,7 +313,7 @@ We now need to convert this to a `sf` layer, like we did with the crime data in 
 
 From `head(metrolink_stations_CSV)`, we can see that the data consists of a number of columns, each with a heading. Two of these are called **GMGRFE** and **GMGRFN**. These are the columns that give the coordinates (Eastings, column ending in `E` and Northings, column ending in `N`) in the British National Grid Coordinate Reference System of each station. 
 
-There are also other columns, with various information. At the moment, the data is just in a data frame object - not any kind of spatial object. The numbers in the columns are just numbers. R doesn't know they are coordiantes (and therefore spatial data) until we explicially tell it.
+There are also other columns, with various information. At the moment, the data is just in a data frame object - not any kind of spatial object. The numbers in the columns are just numbers. R doesn't know they are coordinates (and therefore spatial data) until we explicitly tell it.
 
 To turn it into a spatial layer, enter the following:
 
@@ -388,7 +388,7 @@ This is not a specific problem with our analysis - so we are fine to carry on - 
 
 ## Showing Most and Least Deprived Stations
 
-So how do we show the stations with the most and least depirved catchment areas on the map? When reordering bits in the `View()` tab is useful for exploring, this isn't saved. We can use a different function to do this. 
+So how do we show the stations with the most and least deprived catchment areas on the map? When reordering bits in the `View()` tab is useful for exploring, this isn't saved. We can use a different function to do this. 
 
 There is an `order()` function in R that allows us to reorder data. This is particularly useful if we want to display the 10 most and 10 least deprived stations! This code below creates a new variable with the data in a different order.
 
@@ -396,7 +396,7 @@ There is an `order()` function in R that allows us to reorder data. This is part
 stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscor, decreasing = TRUE), ]
 ```
 
-We can then plot the top and bottom 10 stations. Note that there are 99 stations in our data frame, so `[1:10,]` gives us the top ten (most deprived) and `[89:99,]` will give us the bottom tem (least deprived):
+We can then plot the top and bottom 10 stations. Note that there are 99 stations in our data frame, so `[1:10,]` gives us the top ten (most deprived) and `[89:99,]` will give us the bottom ten (least deprived):
 
 ```{r, comment = NA}
 #plot stations
@@ -471,7 +471,7 @@ we could look at the LSOAs that are within a set distance (for example a 15 minu
 
 <!-- Some LSOAs are quite small, and people from nearby LSOAs might use that tram stop as well. -->
 
-To look at the LSOAs within a set distance, we can use a tool called a buffer. This creates a circle at a set distance around a point. So how big a buffer should we create? How far are people likley to walk to get to their nearest tram stop? Let's say people will talk for 10 min. At a speed of 3 mph, this is equal to about 1.2km. We can use the `st_buffer` function to generate a buffer of 1.2km (1200 m). 
+To look at the LSOAs within a set distance, we can use a tool called a buffer. This creates a circle at a set distance around a point. So how big a buffer should we create? How far are people likely to walk to get to their nearest tram stop? Let's say people will talk for 10 min. At a speed of 3 mph, this is equal to about 1.2km. We can use the `st_buffer` function to generate a buffer of 1.2km (1200 m). 
 
 ```{r, comment = NA}
 #plot the tram stations
@@ -556,10 +556,10 @@ qtm(station_LSOA_IMD)
 
 The `%>%` command (known as a pipe) is a piece of code from the tidyverse. It allows you to pass the output from one function in to another function. This is sometimes known as chaining commands together. Here, we take `tram_stations_IMD`, pass it to `group_by(RSTNAM)` and then pass on to `summarise(mean(IMDscor))`. 
 
-Now we have each station buffer listed once, with the average IMD score (`mean(IMDscore)`). Currently they are still the buffers, which won't make sense to map, so we can convert them back to points (centriods):
+Now we have each station buffer listed once, with the average IMD score (`mean(IMDscore)`). Currently they are still the buffers, which won't make sense to map, so we can convert them back to points (centroids):
 
 ```{r, comment = NA}
-#still buffers (of each station), so convert to points (centriods)
+#still buffers (of each station), so convert to points (centroids)
 station_LSOA_IMD_pt <- st_centroid(station_LSOA_IMD)
 qtm(station_LSOA_IMD_pt)
 ```
@@ -623,10 +623,6 @@ We can extend this principle to look at groups of tram stops (either using just 
 Load the `future_tramlines.geojson`, which is available as a GeoJSON file. This is a different type of file to a shape file and is an XML based format (open it in Notepad if you are interested in how it is structured). `st_read()` can read all sorts of file formats, so we can adapt the code easily.   
   
 ```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
-#download data
-  download.file("http://www.nickbearman.me.uk/data/r/tram.zip","tram.zip")
-#unzip
-  unzip("tram.zip")
 #read in tramline data
   future_tramlines <- st_read(dsn = "future_tramlines.geojson")
 ```
