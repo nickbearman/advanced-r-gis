@@ -232,7 +232,7 @@ tm_shape(stations_in_LSOA) +
     tm_dots(station_LSOA_IMD_pt, size = 0.1, shape = 19, col = "darkred")
 
 #reorder, most deprived at the top
-  station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`mean(IMDscore)`, decreasing = TRUE), ]
+  station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`mean(IMDscor)`, decreasing = TRUE), ]
 
 head(station_LSOA_IMD_pt_ordered)
 
