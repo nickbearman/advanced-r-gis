@@ -6,6 +6,7 @@ https://www.ucl.ac.uk/transport-institute/pdfs/transport-poverty
 
 IMD Data
 
+- need to check and tidy up data
 
 https://data.cdrc.ac.uk/dataset/cdrc-english-indices-of-deprivation-2015-geodata-pack-manchester-e08000003/resource/036cbe26-1a5c-4e2c-9435-242a222ef8d1
 
