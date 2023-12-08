@@ -2,7 +2,7 @@
 
 This is the material for my 1 day course on **Confident Spatial Analysis and Statistics in R & GeoDa**. More details on my courses are available at http://www.geospatialtrainingsolutions.co.uk. 
 
-The material for this workshop is avaliable here:  
+The material for this workshop is available here:  
 - [The PDF of the handout with the practical instructions (PDF, 5.1 MB)](https://github.com/nickbearman/confident-spatial-analysis/releases/download/v6.0/confident-spatial-analysis.pdf)  
 - [Software requirements](https://github.com/nickbearman/confident-spatial-analysis/blob/master/software-requirements.txt)  
 - [The data used in the workshop (folder, total: 3.3 MB)](https://github.com/nickbearman/intermediate-r-spatial-analysis/tree/master/data)

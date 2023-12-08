@@ -2,9 +2,9 @@
 title: "Confident Spatial Analysis and Statistics in R & GeoDa"
 author: "Nick Bearman - Geospatial Training Solutions"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
 date: "Thu 4th May 2023"
 ---
 
@@ -17,12 +17,11 @@ knitr::opts_knit$set(root.dir = 'C:/Users/nick/Documents/work/confident-spatial-
 Learning Outcomes: | R Functions & Libraries:  
 -------- | --------  
 Understand Linked Displays in GeoDa  |  *brushing* (pg. 1)  
-Perform Local Indicators of Spatial Association | *LISA* (pg. 3)   
-Understand how to read in a variety of formats | `st_read()` (pg. 8)  
-Perform a spatial join | `st_join()` (pg. 14)
+Perform Local Indicators of Spatial Association | *LISA* (pg. 3)  
+Calculate Moran's I and LISA in R | `rgeoda()` (pg. 5)
+Perform a spatial join | `st_join()` (pg. 13)
 Know how to reorder data | `order()` (pg. 15) 
-Know how to use buffers within R  | `st_buffer()` (pg. 17)   
-<!-- Understand creating and using functions within R | `function ()` (pg. 13)  -->  
+Know how to use buffers within R  | `st_buffer()` (pg. 16)   
 <!-- Tables have a max line length, if it is too long, the table gets shrunk -->
 
 
@@ -32,7 +31,7 @@ We are going to be performing some Exploratory Data Analysis using a program cal
 
 For the analysis, we are interested in the deprivation levels. First of all, let's have a look at the data in a program called GeoDa.
 
-Download the `tramp.zip` data the website and extract the zip file. 
+Download the `tram.zip` data the website and extract the zip file. 
 
 - Click **Start > GeoDa** 
 - When GeoDa opens, click on the folder icon 
@@ -56,7 +55,7 @@ Select **Tools > Weights Manager** and click **Create**.  The following screen i
 ![](images/weights.png){ height=40% }
 
 - Select **Add ID Variable...** and accept the default name.  
-- You now need to choose the neighbourhood weight method.  Select **Queen Contiguity** and click **Create**.  
+- You now need to choose the neighbourhood weight method.  Select **Queen contiguity** and click **Create**.  
 - The neighbourhood weight matrix is saved in a file.  A suggested name is given.  This is the LSOA shape file name with a suffix of .gal.  Select **Save** and after a few seconds you should see a message **Weights file `lsoa_manchester_age_imd.gal` created successfully**.  
 - Click **OK** on this window and **Close** on the Weights File Creation window. The Weights Manager window should show the details of the neighbours you have just selected. 
 
@@ -99,12 +98,12 @@ Right click on the map and choose **Save Results**. Tick all three boxes (to sav
 
 Open the attribute table within GeoDa ![](images/attribute-table.png){ height=20 } and you can see the three new variables on the right hand side of the table. Click the Save button ![](images/save.png){ height=20 } to save the updated shapefile. 
 
-## LISA in R (optional exercise)
+## Moran's I and LISA in R (optional exercise)
 
 There is a library for R, that allows us to do many of the GeoDa analyses inside R. It is called `rgeoda` and more details are at: 
 https://geodacenter.github.io/rgeoda/. There is also a very good tutorial at https://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html which I'd recommend if you are interested in more details. 
 
-To mirror the LISA analysis we did in GeoDa, load the libraries. Remember to install the `rgeoda` package if you need to: 
+To mirror the Moran's I and LISA analysis we did in GeoDa, load the libraries. Remember to install the `rgeoda` package if you need to: 
 
 ```{r, message=FALSE, warning=FALSE, comment=NA, display=FALSE, results='hide'}
 library(rgeoda)
@@ -115,7 +114,7 @@ library(tmap)
 Load the `lsoa_manchester_age_imd.shp` file from the `trams.zip` file:
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE, comment=NA, display=FALSE, results='hide'}
 #read in shapefile
 manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
 ```
@@ -135,6 +134,52 @@ If we want to, we can integrate the neighbours of a specific polygon:
 # To access the details of the weights: e.g. list the neighbours of a specified observation:
 nbrs <- get_neighbors(queen_w, idx = 1)
 cat("\nNeighbors of the 1-st observation are:", nbrs)
+```
+
+We can replicate the Moran's I scatter plot in R. As far as I can tell, this is not built into the RGeoDa library, so there is a bit of leg work to replicate it. *If you are interested in the background, have a look at https://github.com/GeoDaCenter/rgeoda/issues/41*. 
+
+Our Moran's I scatter plot in GeoDa is the imd value on the x axis, and the lagged imd value on the Y axis. The lagged IMD value is the average value for each LSOA's neighbour, as defined using the neighbourhood tools earlier. This is termed the spatial lag (neighbourhood's average value) and we calculate this based on the weights we have just calculated:
+
+```{r}
+lag <- spatial_lag(queen_w, manchester_lsoa['IMDscor'])
+```
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE,eval=FALSE}
+lag
+```
+
+`lag` is now our lagged value (Y axis). `manchester_lsoa$IMDscor` is our IMD score (X axis). 
+
+Unfortunately they are not in the same format. The `lag` variable is a `list` and we need to make it an integer. 
+
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
+#unlist
+lag <- as.integer(unlist(lag))
+#extract data
+imd <- manchester_lsoa$IMDscor
+```
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE,eval=FALSE}
+#plot graph
+plot(imd,lag)
+```
+
+In GeoDa the values are also rescaled, and we can do this with the `scale()` function:
+
+```{r, eval=FALSE}
+plot(scale(imd),scale(lag))
+```
+
+We also need to calculate the Moran's I value. This is the correlation between the IMD data (`imd`) and the lagged data (`lag`) multiplied by the standard diviation of the lagged data divided by the standard diviation of the imd data. 
+
+```{r}
+#Calculate Moran's I value
+I <- cor(imd, lag) * sd(lag) / sd(imd)
+```
+
+We can then add this to the plot:
+```{r}
+plot(scale(imd),scale(lag), main = paste0("Moran's I: ",round(I,3)))
+#add line
+abline(0,I, col = "red")
 ```
 
 We can also perform our LISA calculation. We need to extract the column we want to use (`IMDscor`) and then use that with the existing weights variable:
@@ -157,8 +202,6 @@ lms <- lisa_values(gda_lisa = lisa)
 ```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE,eval=FALSE}
 lms
 ```
-
-I think these are the input values for creating a Moran's I graph like we did in GeoDa, but I don't think we can currently do this using the `rgeoda` library. Let me know if you discover a way of doing this! I have asked the [GeoDa Team](https://github.com/GeoDaCenter/rgeoda/issues/41) but not yet received an answer. See *Moran's I in R* for an example of this using the `sp` library. 
 
 ```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
 #get the pseudo-p values of significance of local Moran computation, the green significance map
@@ -186,17 +229,23 @@ lbls
 ```
 *Formally, there are also values `6 Undefined` and `7 Isolated` although they are rarely used, and not present in our data for Greater Manchester.* 
 
-We can also then map our data:
+We can use the `table()` command to see how many entries of each there are in the `cats` variable:
 
 ```{r}
+table(cats)
+```
+
+We can also then map our data:
+
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
 #join labels on to the data
   manchester_lsoa$lisaCats <- cats
-  head(manchester_lsoa)
 
 # access colours and labels
   lisa_colors <- lisa_colors(lisa)
   lisa_labels <- lisa_labels(lisa)
-
+```
+```{r}
 #draw map
   tm_shape(manchester_lsoa) + 
     tm_polygons("lisaCats", palette = lisa_colors[1:5], labels = lisa_labels[1:5])
@@ -204,7 +253,7 @@ We can also then map our data:
 
 We have restricted the colours and labels to the first five (`[1:5]`) because we do not need numbers `6` and `7` for this data. 
 
-For more information on the mapping, see https://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html#exploratory-spatial-data-analysis. 
+For more information on the mapping, see the tutorial at https://geodacenter.github.io/rgeoda/articles/rgeoda_tutorial.html#exploratory-spatial-data-analysis. 
 
 \newpage
 
@@ -214,7 +263,7 @@ We are going to be looking at a range of data for the tram system in Greater Man
 
 Now is a good time to remind you about using scripts (i.e. make sure you use one!). It's also a good idea to use the project facility within RStudio. To do this, open RStudio, click **File > New Project...**. Then click **New Directory > Empty Project**, select a folder (e.g. Documents) and then type a new folder name where the project will be saved. Finally click **Create Project**. This will be your working directory. Projects allow RStudio to keep related files (e.g. scripts) together. 
 
-### Plotting maps using `sf`
+### Plotting maps
 
 First, we are going to plot our data. This is a quick recap from previous work, but it is worth doing. Let's load the libraries we need. 
 
@@ -244,7 +293,7 @@ Also, checkout what attributes we have in the data:
   head(manchester_lsoa)
 ```
 
-We have a selection of different columns here. Of particular note are the `IMDscor`, `IMDrank` and `IMD decl` columns - containing IMD data (score, rank and decile). We also have the total number of people in each LSOA (`AllUslR`) and the population in a range of age groups. The age data we have used before - see [Introduction to Spatial Data & Using R as a GIS](https://github.com/nickbearman/intro-r-spatial-analysis) course for details.  
+We have a selection of different columns here. Of particular note are the `IMDscor`, `IMDrank` and `IMDdecl` columns - containing IMD data (score, rank and decile). We also have the total number of people in each LSOA (`AllUslR`) and the population in a range of age groups. The age data we have used before - see [Introduction to Spatial Data & Using R as a GIS](https://github.com/nickbearman/intro-r-spatial-analysis) course for details.  
 
 The IMD data is new. This is the Index of Multiple Deprivation, and consists of a measure of deprivation for each LSOA. <!-- More details on IMD --> 
 
@@ -260,6 +309,9 @@ tm_shape(manchester_lsoa) +
 
 Now we have a map of IMD by LSOA in Greater Manchester. 
 
+*You may have noticed we are using the 2011 Census LSOA boundaries. This is because the IMD data (from 2019) are only available in these boundaries, they have not been updated yet for the 2021 Census LSOA boundaries. Only 3.1% of LSOA boundaries have changed between the two censuses https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/healthandwellbeing/articles/generalhealthbyagesexanddeprivationenglandandwales/census2021.*
+
+*The next version of the IMD for England is due out in 2025 or 2026 and usually Wales, Scotland and NI follow soon after that. More details at https://ocsi.uk/2023/07/10/we-are-updating-the-english-indices-of-deprivation/ if you are interested.*
 
 ## Public Transport Services
 
@@ -272,6 +324,8 @@ Load the tram line data:
 # read in tramlines
   tramlines <- st_read("Metrolink_Lines_Functional.shp")
 ```
+
+The tram line data are just context for us at the moment. Have a look at them using `qtm()` and `head()` and then we can move on to the tram station data. 
 
 We also need the tram stations, which are only available as a CSV file with Eastings and Northings:
 
@@ -292,21 +346,23 @@ This data file actually contains both Railway stations and Tram stations. For th
 View(stations_CSV)
 ```
 
-`View()` is a handy function that allows us to view the data in a scrollable window. Very useful for data exploration. Note that there is a column called `NETTYP` which has two values - `M` for Metrolink station and `R` for railway station. 
+`View()` is a handy function that allows us to view the data in a scrollable window. Very useful for data exploration. Note that there is a column called `NETTYP` (third from the right) which has two values - `M` for Metrolink station and `R` for railway station. 
 
 We can use the `which()` function to select out which rows are metrolink stations:
 
-```{r, comment=NA}
+```{r, comment=NA, eval=FALSE}
 which(stations_CSV$NETTYP == "M")
 ```
 
-However this just gives us a list of numbers - in fact, the index numbers. If we run `stations_CSV[92,]`, it will show us just row 92, a Metrolink station called `Abraham Moss`. 
+However this just gives us a list of numbers - in fact, the index numbers. If we run `stations_CSV[92,]` it will show us just row 92, a Metrolink station called `Abraham Moss`. 
 
 We can use this to do a subset of the data - select out these ones, and save them as a new variable:
 
 ```{r, comment=NA}
 #subset out Metrolink stations
 metrolink_stations_CSV <- stations_CSV[which(stations_CSV$NETTYP == "M"),]
+```
+```{r, comment=NA, eval=FALSE}
 head(metrolink_stations_CSV)
 ```
 
@@ -323,21 +379,27 @@ To turn it into a spatial layer, enter the following:
 tram_stations <- st_as_sf(metrolink_stations_CSV, coords = c('GMGRFE', 'GMGRFN'), crs = 27700)
 ```
 
-This function `st_as_sf() is a generic function allowing us to create `sf` objects. In this case it takes the `metrolink_stations_CSV` variable, extracts the coodinates `coords = c('GMGRFE', 'GMGRFN')` and sets the CRS to British National Grid ` crs = 27700`. 
+This function `st_as_sf()` is a generic function allowing us to create `sf` objects. In this case it takes the `metrolink_stations_CSV` variable, extracts the coordinates `coords = c('GMGRFE', 'GMGRFN')` and sets the CRS to British National Grid `crs = 27700`. 
 
-Try `head(tram_stations)` to see the attribute table, similar to earlier. 
+Try `head(tram_stations)` to see the attribute table, similar to earlier. We can also plot the tram stations, with the tram lines for context:
 
-We can also plot the data, on top of the Greater Manchester LSOAs. 
-
-```{r, comment=NA,warning=FALSE,message=FALSE}
+```{r, comment=NA,warning=FALSE,message=FALSE, eval = FALSE}
 #plot just tram stations
 tm_shape(tram_stations) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") 
+```
+
+```{r, comment=NA,warning=FALSE,message=FALSE, eval=FALSE}
 #plot tram stations and tram lines, for context
 tm_shape(tram_stations) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
 tm_shape(tramlines) +
   tm_lines(col = "black")
+```
+
+We can also plot the data, on top of the Greater Manchester LSOAs. We will be making use of this in the next section. 
+
+```{r, comment=NA,warning=FALSE,message=FALSE,eval=FALSE}
 #plot tram stations and LSOAs
 tm_shape(tram_stations) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") + 
@@ -349,8 +411,6 @@ tm_shape(tram_stations) +
 ## IMD of Tram Station Catchment Areas
 
 Now we know where the tram stations are, and we can overlay that with the LSOA data as we showed in the previous map. 
-
-<!-- === -->
 
 We can see what the deprivation level is at each tram station, using a point in polygon analysis. The points are the tram stations and the polygons are the LSOAs. 
 
@@ -380,18 +440,41 @@ The easiest way to view this is to open it in a `View()` tab:
 View(stations_in_LSOA_count)
 ```
 
-We can then also sort the columns - click on the arrows (IMG) by the **n** column. You can see several LSOAs have more than one tram station within them, e.g. Manchester 054C. 
+We can then also sort the columns - click on the arrows by the **n** column. ![](images/arrows.png){ height=20 } You can see several LSOAs have more than one tram station within them, e.g. Manchester 054C. 
 
 If you look for Manchester 054C in the `stations_in_LSOA` variable - again, easiest in a `View()` tab and reorder the data - then you can see the LSOA Manchester 054C is listed three times, against each tram station it is in: **Exchange Square, Market Street and Victoria**. 
 
-This is not a specific problem with our analysis - so we are fine to carry on - but we will come back to this later on. 
+We can also do this visually - which might make it easier to see what is going on. We can plot a map on one LSOA to see now many tram stations there are. 
+
+First of all we need to know which LSOA we are interested in. R uses indexes to identify things. So we know Manchester 054C has more than one station in it. We can use `which()` to find out the index of Manchester 054C.
+
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
+which(manchester_lsoa$NAME == "Manchester 054C")
+```
+Which will tell us it is `1643`. We can then plug this into some map code:
+
+```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
+#example of LSOA with more than one tram station in
+tm_shape(manchester_lsoa[1643,]) +
+  tm_borders() +
+  tm_shape(tram_stations) +
+  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+  tm_shape(manchester_lsoa) +
+  tm_borders() +
+  tm_shape(tramlines) +
+  tm_lines(col = "black")
+```
+
+Here we see the stations (red dots) the line (black) and the LSOA boundaries (grey). *Remember the order of the map layers is key - the first one (in this case `tm_shape(manchester_lsoa[1643,])`) sets what is shown on the map, and then the rest are added in order, first to last.* 
+
+This is not a specific problem at the moment, as each tram station has one LSOA linked with it - but we will come back to this later on. 
 
 
 ## Showing Most and Least Deprived Stations
 
-So how do we show the stations with the most and least deprived catchment areas on the map? When reordering bits in the `View()` tab is useful for exploring, this isn't saved. We can use a different function to do this. 
+So how do we show the stations with the most and least deprived LSOAs on the map? When reordering bits in the `View()` tab is useful for exploring, this isn't saved. We can use a different function to do this. 
 
-There is an `order()` function in R that allows us to reorder data. This is particularly useful if we want to display the 10 most and 10 least deprived stations! This code below creates a new variable with the data in a different order.
+There is an `order()` function in R that allows us to reorder data. This is particularly useful if we want to display the 10 most and 10 least deprived stations! This code below reorders the data within the existing variable.
 
 ```{r, comment = NA}
 stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscor, decreasing = TRUE), ]
@@ -399,11 +482,13 @@ stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscor, decreasing 
 
 We can then plot the top and bottom 10 stations. Note that there are 99 stations in our data frame, so `[1:10,]` gives us the top ten (most deprived) and `[89:99,]` will give us the bottom ten (least deprived):
 
-```{r, comment = NA}
-#plot stations
+```{r, comment = NA, eval=FALSE}
+#plot all stations
 tm_shape(stations_in_LSOA) +
   tm_dots(stations_in_LSOA, size = 0.1, shape = 19, col = "darkred") 
+```
 
+```{r, comment = NA}
 #show top / bottom stations
 tm_shape(stations_in_LSOA) +
   tm_dots(size = 0.1, shape = 19, col = "darkred") +
@@ -415,98 +500,106 @@ tm_shape(stations_in_LSOA) +
   
 So, which tram stop is the most deprived? and which is the least deprived?
   
-```{r, comment = NA,warning=FALSE,message=FALSE,error=FALSE, results='hide'}
-#most deprived
-stations_in_LSOA[1,]
-#least deprived
-stations_in_LSOA[99,]
-```
-
-<!-- DROPPED STILL SP
-## Creating a Function (optional exercise)
-
-The code for doing a spatial join can easily be turned into a function within R. A function allows us to repeat a section of code with different data, without having to type out all of the lines again. This also hides some of the complexity from the user. For example, if we wanted to do a spatial join between railway stations and LSOAs, we could just substitute railway stations for trams. A function we have written ourselves works exactly the same way as many other functions we have used (`read.csv()`, `readOGR()`, etc.). Running a `SpatialJoin()` function we have written would look a bit like this:
-
-```{r, comment=NA,warning=FALSE,message=FALSE, eval = FALSE}
-tram_stations_joined <- SpatialJoin(tram_stations, manchester_lsoa)
-```
-
-Where `tram_stations` and `manchester_lsoa` are the parameters, `SpatialJoin` the function name and `tram_stations_joined` the output. Currently, if you ran the line above, R would give an error message, as it doesn't know what that function is. To create the function (and it will appear in the environment list on the right) run this code:
-
-```{r, comment=NA,warning=FALSE,message=FALSE}
-#function to join points with the attribute data of the polygons they overlay
-SpatialJoin <- function(pts, polys) {
-  #error checking
-    if (!inherits(polys, "SpatialPolygonsDataFrame")) 
-        stop("MUST BE SP SpatialPolygonsDataFrame OBJECT")
-    if ((inherits(pts, "SpatialPointsDataFrame") | inherits(pts, "SpatialPoints")) == FALSE) 
-        stop("Must be sp SpatialPointsDataFrame object")
-  #extract points in overlay
-    z <- pts[!is.na(over(pts, geometry(polys))),]
-  #join attribute data  
-    z@data <- data.frame(z@data, na.omit(over(pts,polys)) )
-  #update projection
-    z@proj4string <- pts@proj4string
-  #return z
-    z
-}     
-```
-
-In a function it is common to use generic terms to refer to the inputs and outputs (e.g. pts, polys, z), because the function doesn't know (or care) whether we are dealing with tram stations or railway stations - it just cares that it is a point (or polygon) layer. 
-
-This is where error checking comes in, which is what takes up the first half of the function. These check whether the poly variable is a polygon and the pts variable a points layer. If they are not, it will stop running and generate an error message. Try creating the function and running it. 
-
-We can then repeat the process of working out which train station is the most and least deprived. The train stations for Manchester are included in the tram.zip file as `rail-stations.geojson` (originally from https://data.gov.uk/dataset/metrolink-and-rail-stations). Try writing the code to read the data in, join it, reorder it and display it on the map. 
-
-
--->
- <!-- === -->
- 
 ## Tram Stop Buffers
 
-Currently we have been looking at just the LSOA each tram stop is within. However if we overlay each tram stop (as a point) we can see that assuming that people come from the LSOA it is in might not be a good idea. 
-
-<!-- add example --> 
-
-we could look at the LSOAs that are within a set distance (for example a 15 minute walk) of each tram stop. Why do you think we might we want to do this?
-
-<!-- Some LSOAs are quite small, and people from nearby LSOAs might use that tram stop as well. -->
-
-To look at the LSOAs within a set distance, we can use a tool called a buffer. This creates a circle at a set distance around a point. So how big a buffer should we create? How far are people likely to walk to get to their nearest tram stop? Let's say people will talk for 10 min. At a speed of 3 mph, this is equal to about 1.2km. We can use the `st_buffer` function to generate a buffer of 1.2km (1200 m). 
+Currently we have been looking at just the LSOA each tram stop is within. However if we overlay each tram stop (as a point) we can see that assuming that people come from the LSOA it is in might not be a good idea. A good example is the St Werburgh's Road tram stop. We can map this using the same principle as we did to map one LSOA earlier:
 
 ```{r, comment = NA}
+#which index do we need?
+which(tram_stations$RSTNAM == "St Werburgh's Road")
+#map them
+tm_shape(tram_stations[c(84,19,94),]) +
+  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+  tm_shape(manchester_lsoa) + 
+  tm_polygons("IMDscor", title = "IMD Score", palette = "Blues", style = "jenks") +
+  tm_shape(tram_stations[84,]) +
+  tm_dots(tram_stations, size = 0.1, shape = 19, col = "red") +
+    tm_shape(tramlines) +
+  tm_lines(col = "black")
+```
+
+Here, we have St Werburgh's Road (in red) and the surrounding LSOAs, coloured in blue to represent their IMD (dark blue = more deprived). However we don't know whether users of the tram come from the LSOA to the east (dark blue), south (light blue) or north (mid blue). In fact, they probably come from all three LSOAs. 
+
+<add example to powerpoint>
+
+we could look at the LSOAs that are within a set distance (for example a 15 minute walk) of each tram stop. How would this help?
+
+To look at the LSOAs within a set distance, we can use a tool called a buffer. This creates a circle at a set distance around a point. 
+
+So how big a buffer should we create? How far are people likely to walk to get to their nearest tram stop? Let's say people will walk for 15 min. At a speed of 3 mph, this is equal to about 1.2km. We can use the `st_buffer()` function to generate a buffer of 1.2km (1200 m). 
+
+```{r, comment = NA, eval=FALSE}
 #plot the tram stations
   qtm(tram_stations)
+```
+```{r, comment = NA}
 #calculate the buffer (distance is 1200 meters)
   tram_stations_1200_buffer <- st_buffer(tram_stations, 1200)
+```
+```{r, comment = NA, eval=FALSE}
 #plot the buffer
   qtm(tram_stations_1200_buffer)
 ```
 
-We now have the buffers (the circles) for each tram station. 
-
 ```{r, comment = NA}
-# overlay one tram stop and the LSOAs
-#plot the buffer, lsoas and tram stations
-  tm_shape(tram_stations_1200_buffer[4,]) +
-    tm_polygons() +
-  tm_shape(manchester_lsoa) +
-    tm_polygons(alpha=0.1) +
-  tm_shape(tram_stations[4,]) +
-    tm_dots()
+tm_shape(tram_stations_1200_buffer[84,]) +
+  tm_polygons(alpha=0) +
+  tm_shape(tram_stations[c(84,19,94),]) +
+  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+  tm_shape(manchester_lsoa) + 
+  tm_polygons("IMDscor", title = "IMD Score", palette = "Blues", style = "jenks") +
+  tm_shape(tram_stations_1200_buffer[84,]) +
+  tm_polygons(alpha=0.3) +
+  tm_shape(tramlines) +
+  tm_lines(col = "black") +
+  tm_shape(tram_stations) +
+  tm_dots(tram_stations, size = 0.2, shape = 19, col = "black") +
+  tm_shape(tram_stations[84,]) +
+  tm_dots(tram_stations, size = 0.2, shape = 19, col = "red")
 ```
 
-See how our 1.2km buffer around a tram station covers a number of different LSOAs. Additionally some LSOAs are completely covered, and some are only partially covered. 
+This shows St Werburgh's Road (in red) and other tram stations in black. Clearly this buffer is too big - not everyone in this buffer would go to St Werburgh's Road. So we need to make the buffer a bit smaller. This might be different on stations further out in the network - and we could have different sized buffers for each station, either based a) on the location of the neighbouring stations or b) even a survey of passengers at each station. This highlights some of the issues of working with a model like this. 
+
+Anyway, a buffer size of 600m seems a reasonable compromise:
+
+```{r, message=FALSE, display=FALSE, comment = NA, display = FALSE, echo=FALSE}
+tram_stations_buffer <- st_buffer(tram_stations, 600)
+tm_shape(tram_stations_buffer[c(84,19,94),]) +
+  tm_polygons(alpha=0) +
+  tm_shape(tram_stations[c(84,19,94),]) +
+  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+  tm_shape(manchester_lsoa) + 
+  tm_polygons("IMDscor", title = "IMD Score", palette = "Blues", style = "jenks") +
+  tm_shape(tram_stations_buffer) +
+  tm_polygons(alpha=0.3) +
+  tm_shape(tramlines) +
+  tm_lines(col = "black") +
+  tm_shape(tram_stations) +
+  tm_dots(tram_stations, size = 0.2, shape = 19, col = "black") +
+  tm_shape(tram_stations[84,]) +
+  tm_dots(tram_stations, size = 0.2, shape = 19, col = "red")
+```
+
+```{r, comment = NA}
+tram_stations_buffer <- st_buffer(tram_stations, 600)
+```
+
+
+We now have the buffers (the circles) for each tram station. See how our 600m buffer around a tram station covers a number of different LSOAs. Additionally a few LSOAs are completely covered, and most are only partially covered by the buffers. 
 
 There are a number of different ways we can look at how the buffers and LSOAs relate to one another. We are going to look at a quite simple approach - convert the LSOAs to points and for each buffer use a point in polygon analysis to take the average deprivation level of the LSOAs (points) within the buffer. 
 
 **There are a number of limitations with this method and this is something to think about as you work through this process: how could you do the analysis differently in the future?**
 
-First, we need to convert the LSOA polygons into points. Fortunately, there is a function (`st_centroid()`) which will do this for us. This calculates the centre point (centroid) for each LSOA. The function creates a `sf` data frame.
+*We will also discuss some alternative approaches later in the practical.*
+
+First, we need to convert the LSOA polygons into points. Fortunately, there is a function `st_centroid()` which will do this for us. This calculates the centre point (centroid) for each LSOA. The function creates a `sf` data frame.
 
 ```{r, comment = NA}
 #convert polygons to points  
   manchester_lsoa_points <- st_centroid(manchester_lsoa) 
+```
+```{r, comment = NA, eval = FALSE}
 #plot points
   qtm(manchester_lsoa_points)
 #plot points and LSOA
@@ -524,50 +617,79 @@ View(manchester_lsoa_points)
 
 Now we have the train stations buffers as polygons and the LSOAs as points (as shown in the plot above). We can do the overlay manually by plotting the different data sets on top of one another. 
 
+This is a (simpler) version of the map:
+
 ```{r, comment = NA}
 #map of one station buffer with LSOA points in it
-tm_shape(tram_stations_1200_buffer[1,]) +
-  tm_borders(col = "red") +
-tm_shape(tram_stations[1,]) +
-  tm_dots(size = 0.5) +
-tm_shape(manchester_lsoa_points) +
-  tm_dots(manchester_lsoa_points, size = 0.1, shape = 19, col = "darkred") +
-tm_shape(manchester_lsoa) +
-  tm_polygons(alpha=0.1)
+tm_shape(tram_stations_buffer[c(84),]) +
+  tm_polygons(alpha=0) +
+  tm_shape(manchester_lsoa) + 
+  tm_polygons() +
+  tm_shape(tram_stations[c(84),]) +
+  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+  tm_shape(manchester_lsoa_points) +
+  tm_dots(manchester_lsoa_points, size = 0.1, shape = 19, col = "darkgreen") +
+  tm_shape(tram_stations_buffer[c(84),]) +
+  tm_polygons(alpha=0)
 ```
 
-However, to link the two we need to do a spatial join. This is similar to what we did earlier. 
+This is a bit more complex, but shows the data better. Feel free to skip if you want to!
+
+```{r, comment = NA}
+tm_shape(tram_stations_buffer[c(84,19,94),]) +
+  tm_polygons(alpha=0) +
+  tm_shape(tram_stations[c(84,19,94),]) +
+  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+  tm_shape(manchester_lsoa) + 
+  tm_polygons("IMDscor", title = "IMD Score", palette = "Blues", style = "jenks") +
+  tm_shape(manchester_lsoa_points) +
+  tm_dots(manchester_lsoa_points, size = 0.1, shape = 19, col = "darkred") +
+  tm_shape(tram_stations_buffer) +
+  tm_polygons(alpha=0.3) +
+  tm_shape(tramlines) +
+  tm_lines(col = "black") +
+  tm_shape(tram_stations) +
+  tm_dots(tram_stations, size = 0.2, shape = 19, col = "black") +
+  tm_shape(tram_stations[84,]) +
+  tm_dots(tram_stations, size = 0.2, shape = 19, col = "red")
+```
+
+The map just shows how the data relate to each other. However, to link the two we need to do a spatial join. This is similar to what we did earlier. 
 
 ```{r, comment = NA}
 #st_join is a left join
 #join each station to the LSOAs within the buffer
-  tram_stations_IMD <- st_join(tram_stations_1200_buffer, manchester_lsoa_points)
+  tram_stations_IMD <- st_join(tram_stations_buffer, manchester_lsoa_points)
   View(tram_stations_IMD)
 ```
 
-Each station (`tram_stations_1200_buffer`) is listed multiple times - one for each LSOA (`manchester_lsoa_points`) which falls within the buffer. We can group this:
+Each station (`tram_stations_buffer`) is listed multiple times - one for each LSOA (`manchester_lsoa_points`) which falls within the buffer. We can group this:
 
 ```{r, comment = NA}
 #group by Station, take average IMDscore. 
   station_LSOA_IMD <- tram_stations_IMD %>% group_by(RSTNAM) %>% summarise(mean(IMDscor)) 
 #view the average IMD score for each station
 View(station_LSOA_IMD)
+```
+```{r, comment = NA, eval = FALSE}
 qtm(station_LSOA_IMD)
 ```
 
 The `%>%` command (known as a pipe) is a piece of code from the tidyverse. It allows you to pass the output from one function in to another function. This is sometimes known as chaining commands together. Here, we take `tram_stations_IMD`, pass it to `group_by(RSTNAM)` and then pass on to `summarise(mean(IMDscor))`. 
 
-Now we have each station buffer listed once, with the average IMD score (`mean(IMDscore)`). Currently they are still the buffers, which won't make sense to map, so we can convert them back to points (centroids):
+Now we have each station buffer listed once, with the average IMD score (`mean(IMDscor)`). Currently they are still the buffers, which won't make sense to map, so we can convert them back to points (centroids):
 
 ```{r, comment = NA}
 #still buffers (of each station), so convert to points (centroids)
 station_LSOA_IMD_pt <- st_centroid(station_LSOA_IMD)
+```
+```{r, comment = NA, eval = FALSE}
 qtm(station_LSOA_IMD_pt)
 ```
 
-Now we can map them:
+Now we can map them with the IMD score:
 
-```{r, comment = NA}
+```{r, comment = NA, eval = FALSE}
 tm_shape(tram_stations_1200_buffer) +
   tm_borders(col = "red") +
   tm_shape(station_LSOA_IMD_pt) +
@@ -584,16 +706,24 @@ station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`me
 head(station_LSOA_IMD_pt_ordered)
 
 #plot map of average IMD score by station (top 10 in Red, bottom 10 in Blue)
-tm_shape(station_LSOA_IMD_pt_ordered) +
+tm_shape(station_LSOA_IMD) +
+  tm_polygons("mean(IMDscor)", title = "IMD Score", palette = "Blues", style = "jenks") +
+  tm_shape(station_LSOA_IMD_pt_ordered) +
   tm_dots(station_LSOA_IMD_pt_ordered, size = 0.1, shape = 19, col = "darkred") +
   tm_shape(station_LSOA_IMD_pt_ordered[1:10,]) +
   tm_dots(station_LSOA_IMD_pt_ordered[1:10,], size = 0.1, shape = 19, col = "red") +
   tm_shape(station_LSOA_IMD_pt_ordered[89:99,]) +
   tm_dots(station_LSOA_IMD_pt_ordered[89:99,], size = 0.1, shape = 19, col = "blue") 
+
 ```
 
 
-We now have the average deprivation for each tram stop. **How is this different to our previous measure?** 
+We now have the average deprivation for each tram stop. 
+**What problems might there be with this method?**
+
+**How is this different to our previous measure?** 
+
+
 
 <!-- show side by side: 
 
@@ -614,8 +744,32 @@ tm_shape(station_LSOA_IMD_pt_ordered) +
 -->
   
 - Discuss your results with a neighbour. How could the deprivation be calculated differently? 
-- Try running the analysis with a different buffer. How easy is this within R to change the buffer to 1km (1000m) compared to another GIS? 
 
+There are many different ways to improve this analysis. If you want, have a go at one or two of the options below:
+
+- Try running the analysis with a different buffer. How easy is this within R to change the buffer to 1km (1000m) compared to another GIS? 
+- We calculated the average (`mean(IMDscor)`) IMD score for each tram station catchment area. Are there better measures for quantifying who has access, given we are interested in looking at access for the most deprived areas. Would `max(IMDscor)`, to show the most deprived LSOA, be more useful? Can you update the code for this?
+
+Next up we have two optional exercises: **Polygon Polygon Overlay** and **Future Tram Expansion**. Do try one, or both of these, if you have time. 
+
+
+## Polygon Polygon Overlay (optional exercise)
+
+When we looked at which LSOAs were in the catchment area, we converted the polygons to points, and then either the LSOA was in the catchment area of the tram station, or it was not in the catchment area. However when we look at the LSOA polygons, it is clear many are only partly in the catchment area. Could we include this in our analysis somehow? 
+
+*An interesting aside is is there any benefit to including this in our analysis? We have already estimated the walking distance, which has it's pros and cons. Is including the polygon LSOAs worth the extra time and effort? For the moment we will say yes, but this is always something to keep in mind.*
+
+One potential way to more accurately represent the population who are within the tram station catchment areas is to use a weighted area calculation. This involves calculating the area of the LSOA that is inside the buffer (e.g. 68%) then incorporate this into the overall average using a weighted approach (e.g. 68% of the IMD score for that LSOA).
+
+*This is a very common approached used with population, e.g. if 68% of the LSOA area is within the buffer zone, then it makes sense to assume 68% of the population could make use of the tram station.*
+
+We can extend this to IMD score, with the assumption if 68% of one deprived area is within the tram station catchment area, but 100% of a different area is within the catchment area of a different tram station, it is more important to prioritise the deprived area with 100% coverage than the one with 68% coverage. Therefore a 100% weight is given to one, and only a 68% weight is given to another. 
+
+So how can we do this in R? When faced with a question like this, often Stack Exchange has some useful posts. Have a read of this post http://gis.stackexchange.com/questions/140504/extracting-intersection-areas-in-r for some interesting suggestions, particularly using the `sf` library at the bottom of the post. 
+
+Have a go at writing the code. The function `st_intersection()` is the key one you need to use. 
+
+*The answers are provided in `st_intersection_code.R` if you want to have a look. Try working out the code yourself first though!*
 
 ## Future Tram Expansion (optional exercise)
 
@@ -630,9 +784,7 @@ Load the `future_tramlines.geojson`, which is available as a GeoJSON file. This 
 
 When combined with the `future_tramstops.shp` file, we can see we have three different areas for expansion: Stockport Extension, Airport western loop and Port Salford. 
 
-```{r, comment=NA, message=FALSE, warning=FALSE, results='hide'}
-# read in data
-  future_tramstops <- st_read("future_tramstops.shp")
+```{r, comment=NA, message=FALSE, warning=FALSE, results='hide', eval=FALSE}
 # plot data
 tm_shape(future_tramlines) +
   tm_lines() +
@@ -645,26 +797,13 @@ There is only funding to build one route, and we need to chose which one to buil
 
 **Analyse the prospective new routes to see which reaches the areas with highest deprivation levels.**
 
-
-## Polygon Polygon Overlay (optional exercise)
-
-When we looked at which LSOAs were in the catchment area, we converted the polygons to points, and then either the LSOA was in the catchment area, or was not in the catchment area. However some LSOAs were only partially in the catchment area. Could we include this in our analysis somehow? 
-
-One potential way is to use a weighted area calculation. This involves calculating the area of the LSOA that is inside the buffer (e.g. 68%) then incorporate this into the overall average using a weighted approach (e.g. 68% of the IMD score for that LSOA).
-
-*This is a very common approached used with population, e.g. if 68% of the LSOA area is within the buffer zone, then it makes sense to assume 68% of the population could make use of the tram station.*
-
-We can extend this to IMD score, with the assumption if 68% of one deprived area is within the tram station catchment area, but 100% of a different area is within the catchment area of a different tram station, it is more important to prioritise the deprived area with 100% coverage than the one with 68% coverage. Therefore a 100% weight is given to one, and only a 68% weight is given to another. 
-
-- How about doing a polygon polygon overlay? How easy is this in R compared to another GIS? *See http://gis.stackexchange.com/questions/140504/extracting-intersection-areas-in-r for some interesting suggestions, particularly using sf at the bottom of the post. The answers are provided in `st_intersection_code.R` if you want to have a look. Try working out the code yourself first though!*
-
 -----
 
   
-This practical was written using R 4.2.0 (2022-04-22) and RStudio 2022.02.3 by Dr. Nick Bearman (nick@geospatialtrainingsolutions.co.uk). It has also been tested in R 4.2.0 (2022-04-22) and RStudio 2022.02.3 (RStudio Cloud).
+This practical was written using R 4.3.0 (2023-04-21) and RStudio 2023.06.0 by Dr. Nick Bearman (nick@nickbearman.com). It has also been tested in R 4.3.2 (2023-10-31) and RStudio 2023.09.1 (RStudio Cloud).
 
 This work (Confident Spatial Analysis and Statistics in R & GeoDa) is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/. <img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1">
 
-The latest version of the PDF is available from https://github.com/nickbearman/confident-spatial-analysis. This is v6.0 and this was created on `r format(Sys.time(), '%d %B %Y')`.
+The latest version of the PDF is available from https://github.com/nickbearman/confident-spatial-analysis. This is v7.0 and this was created on `r format(Sys.time(), '%d %B %Y')`.
 
 
