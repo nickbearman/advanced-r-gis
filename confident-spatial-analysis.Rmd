@@ -11,21 +11,22 @@ date: "Thu 4th May 2023"
 ```{r setup, echo=FALSE}
 #set working directory to /data-user
 knitr::opts_knit$set(root.dir = 'C:/Users/nick/Documents/work/confident-spatial-analysis/data-user')
-#knitr::opts_knit$set(root.dir = '/home/nickbearman/work/confident-spatial-analysis/data-user')
 ```
 
-Learning Outcomes: | R Functions & Libraries:  
+Learning Outcomes: | Concepts & R Functions:  
 -------- | --------  
-Understand Linked Displays in GeoDa  |  *brushing* (pg. 1)  
-Perform Local Indicators of Spatial Association | *LISA* (pg. 3)  
-Calculate Moran's I and LISA in R | `rgeoda()` (pg. 5)
-Perform a spatial join | `st_join()` (pg. 13)
-Know how to reorder data | `order()` (pg. 15) 
-Know how to use buffers within R  | `st_buffer()` (pg. 16)   
+Understand linked displays in GeoDa |  brushing *p1*  
+Be able to interpret Spatial Autocorrelation | Moran's I *p3* 
+Perform Local Indicators of Spatial Association | LISA *p3*  
+Calculate Moran's I and LISA in R | `rgeoda()` *p5*
+Perform Point in Polygon analysis | `st_join()` *p13*
+Know how to reorder data | `order()` *p15*  
+Know how to use buffers within R  | `st_buffer()` *p16*   
+Pros and cons using point or polygon data | `st_centroid()` *p23*
 <!-- Tables have a max line length, if it is too long, the table gets shrunk -->
 
 
-# Practical 1: Spatial Analysis
+# Practical 1: Spatial Statistics
 
 We are going to be performing some Exploratory Data Analysis using a program called GeoDa. The data we are using covers Manchester, UK. 
 
