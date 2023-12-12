@@ -1,15 +1,12 @@
-software-requirements
+Software Requirements for Confident Spatial Analysis and Statistics in R & GeoDa
 
-GeoDa (1.8.16 or above) http://geodacenter.github.io/download.html
+GeoDa (1.22 or above) http://geodacenter.github.io/download.html
 
-R (3.5 or above)
-RStudio (1.1.456 or above)
+R (4.0 or above)
+RStudio (2023.06.0 or above)
 
 Libraries:
-rgeos
-rgdal
-maptools
-classInt
-RColorBrewer
-
-  
+rgeoda
+sf
+tmap
+dplyr

@@ -1,3 +1,5 @@
+Polls used in presentation
+
 Which is the best classification method?
 Equal Interval
 Natural Breaks / Jenks / Fisher
