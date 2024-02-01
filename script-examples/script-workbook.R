@@ -82,7 +82,7 @@ library(sf)
 library(tmap)
 
 #read in data
-setwd("~/work/confident-spatial-analysis/data/tram")
+setwd("~/work/confident-spatial-analysis/data-user")
 manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
 
 #plot data
