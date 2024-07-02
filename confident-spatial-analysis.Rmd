@@ -1,11 +1,11 @@
 ---
 title: "Confident Spatial Analysis and Statistics in R & GeoDa"
-author: "Nick Bearman - Geospatial Training Solutions"
+author: "Nick Bearman"
 output:
   pdf_document: default
   html_document:
     df_print: paged
-date: "Thu 4th May 2023"
+date: "Tue 16th and Wed 17th July 2024"
 ---
 
 ```{r setup, echo=FALSE}
@@ -45,7 +45,7 @@ Download the `tram.zip` data the website and extract the zip file.
 
 GeoDa should open a map display of the data automatically. We can create a simple choropleth map in here by right clicking on the map and then select **Change Current Map Type**. Select **Natural Breaks > 5** and choose the variable to map (we want **IMDscor**). Then a classified map will appear, similar to one we have created in RStudio. 
 
-Also open the attribute table ![Attribute Table](images/attribute-table.png){ height=20 } and a histogram ![Histogram](images/histogram.png){ height=20 } for `IMDscor`. GeoDa allows us to use brushing or linked displays. Select one of the larger bars in the histogram and you will see that the same entries are highlighted on the map and in the attribute table. You can also draw a box on the map (left-click and drag) and that will highlight the entries as well (you can drag the box around). 
+Also open the attribute table ![Attribute Table](images/attribute-table.png){ height=30 } and a histogram ![Histogram](images/histogram.png){ height=30 } for `IMDscor`. GeoDa allows us to use brushing or linked displays. Select one of the larger bars in the histogram and you will see that the same entries are highlighted on the map and in the attribute table. You can also draw a box on the map (left-click and drag) and that will highlight the entries as well (you can drag the box around). 
 
 *How is this different to interacting with the data in RStudio, or QGIS/ArcGIS if you have used those packages? Is it better / easier to use? Or harder to use?*
 
@@ -801,7 +801,7 @@ There is only funding to build one route, and we need to chose which one to buil
 -----
 
   
-This practical was written using R 4.3.0 (2023-04-21) and RStudio 2023.06.0 by Dr. Nick Bearman (nick@nickbearman.com). It has also been tested in R 4.3.2 (2023-10-31) and RStudio 2023.09.1 (RStudio Cloud).
+This practical was written using GeoDa 1.22.0.4 (9 Oct 2023), R 4.3.0 (2023-04-21) and RStudio 2023.06.0 by Dr. Nick Bearman (nick@nickbearman.com). It has also been tested in R 4.3.2 (2023-10-31) and RStudio 2023.09.1 (RStudio Cloud).
 
 This work (Confident Spatial Analysis and Statistics in R & GeoDa) is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/. <img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1">
 
