@@ -13,7 +13,8 @@ manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
 queen_w <- queen_weights(manchester_lsoa)
 summary(queen_w)
 
-# To access the details of the weights: e.g. list the neighbours of a specified observation:
+# To access the details of the weights: 
+# e.g. list the neighbours of a specified observation:
 nbrs <- get_neighbors(queen_w, idx = 1)
 cat("\nNeighbors of the 1-st observation are:", nbrs)
 
@@ -89,8 +90,7 @@ manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
 qtm(manchester_lsoa)
 head(manchester_lsoa)
 
-#check whether these are 2011 LSOAs - guessing so. Need to wait for IMD to 
-#update to 2021 LSOAs
+#these are 2011 LSOAs. Need to wait for IMD to update to 2021 LSOAs
 
 #map of imd
 tm_shape(manchester_lsoa) + 
