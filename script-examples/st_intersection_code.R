@@ -44,7 +44,7 @@ ggplot(wt_imd_pt) +
   scale_colour_continuous("Weighted IMD", type = "viridis") +
   theme_void()
 
-##Many thanks to Tom Cunningham, who wrote this and shared it on2023-05-04
+##Many thanks to Tom Cunningham, who wrote this and shared it on 2023-05-04
 
 #weighted-average-graph.png
 
