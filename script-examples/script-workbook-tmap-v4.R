@@ -1,3 +1,11 @@
+##Script from the workbook
+  # updated version for tmap v4
+  # install using:
+  # install.packages("remotes")
+  # remotes::install_github('r-tmap/tmap')
+  # if you don't want to change your main computer setup, you can try out on posit.cloud
+  # https://nickbearman.github.io/installing-software/r-rstudio.html#posit-cloud
+
 # Practical 1: Spatial Analysis
 # Moran’s I and LISA in R (optional exercise)
 
