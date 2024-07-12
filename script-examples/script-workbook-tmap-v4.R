@@ -101,11 +101,16 @@ head(manchester_lsoa)
 
 #these are 2011 LSOAs. Need to wait for IMD to update to 2021 LSOAs
 
-#map of imd
+#map of imd v3
 tm_shape(manchester_lsoa) + 
   tm_polygons("IMDscor", title = "IMD Score", palette = "Blues", style = "jenks") +
   tm_layout(legend.title.size = 0.8)
-#code works, but needs to be updated
+
+#map of imd v4
+tm_shape(manchester_lsoa) +
+  tm_polygons(fill = "IMDscor",
+              fill.scale = tm_scale_intervals(values = "blues", n = 6, style = "jenks"),
+              fill.legend = tm_legend(title = "IMD Score"))
 
 ## public transport services
 
@@ -130,21 +135,35 @@ head(metrolink_stations_CSV)
 tram_stations <- st_as_sf(metrolink_stations_CSV, coords = c('GMGRFE', 'GMGRFN'), crs = 27700)
 head(tram_stations)
 
-#plot just tram stations
+#plot just tram stations v3
 tm_shape(tram_stations) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred")
-#code does NOT work, needs to be updated
 
-#plot tram stations and tram lines, for context
+#plot just tram stations v4
+tm_shape(tram_stations) +
+  tm_dots(points.only = "ifany", fill = "darkred")
+
+#plot tram stations and tram lines, for context v3
 tm_shape(tram_stations) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
   tm_shape(tramlines) +
   tm_lines(col = "black")
-#code does NOT work, needs to be updated
 
-#plot tram stations and LSOAs
+#plot tram stations and tram lines, for context v4
+tm_shape(tram_stations) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_shape(tramlines) +
+  tm_lines(col = "black")
+
+#plot tram stations and LSOAs v3
 tm_shape(tram_stations) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+  tm_shape(manchester_lsoa) +
+  tm_borders()
+
+#plot tram stations and LSOAs v4
+tm_shape(tram_stations) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
   tm_borders()
 
@@ -164,7 +183,7 @@ View(stations_in_LSOA_count)
 
 which(manchester_lsoa$NAME == "Manchester 054C")
 
-#example of LSOA with one tram station in
+#example of LSOA with one tram station in v3
 tm_shape(manchester_lsoa[918,]) +
   tm_borders() +
   tm_shape(tram_stations) +
@@ -173,9 +192,18 @@ tm_shape(manchester_lsoa[918,]) +
   tm_borders() +
   tm_shape(tramlines) +
   tm_lines(col = "black")
-#code does NOT work, needs to be updated
 
-#example of LSOA with more than one tram station in
+#example of LSOA with one tram station in v4
+tm_shape(manchester_lsoa[918,]) +
+  tm_borders() +
+  tm_shape(tram_stations) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_shape(manchester_lsoa) +
+  tm_borders() +
+  tm_shape(tramlines) +
+  tm_lines(col = "black")
+
+#example of LSOA with more than one tram station in v3
 tm_shape(manchester_lsoa[1643,]) +
   tm_borders() +
   tm_shape(tram_stations) +
@@ -184,23 +212,43 @@ tm_shape(manchester_lsoa[1643,]) +
   tm_borders() +
   tm_shape(tramlines) +
   tm_lines(col = "black")
-#code does NOT work, needs to be updated
+
+#example of LSOA with more than one tram station in v4
+tm_shape(manchester_lsoa[1643,]) +
+  tm_borders() +
+  tm_shape(tram_stations) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_shape(manchester_lsoa) +
+  tm_borders() +
+  tm_shape(tramlines) +
+  tm_lines(col = "black")
 
 ## Showing Most and Least Deprived Stations
 stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscor, decreasing = TRUE), ]
 
-#plot stations
+#plot stations v3
 tm_shape(stations_in_LSOA) +
   tm_dots(stations_in_LSOA, size = 0.1, shape = 19, col = "darkred")
-#code does NOT work, needs to be updated
 
-#show top / bottom stations
+#plot stations v4
+tm_shape(stations_in_LSOA) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred")
+
+#show top / bottom stations v3
 tm_shape(stations_in_LSOA) +
   tm_dots(size = 0.1, shape = 19, col = "darkred") +
   tm_shape(stations_in_LSOA[1:10,]) +
   tm_dots(size = 0.1, shape = 19, col = "red") +
   tm_shape(stations_in_LSOA[89:99,]) +
   tm_dots(size = 0.1, shape = 19, col = "blue")
+
+#show top / bottom stations v4
+tm_shape(stations_in_LSOA) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_shape(stations_in_LSOA[1:10,]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "red") +
+  tm_shape(stations_in_LSOA[89:99,]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "blue")
 
 #most deprived
 stations_in_LSOA[1,]
@@ -212,16 +260,27 @@ stations_in_LSOA[99,]
 which(tram_stations$RSTNAM == "St Werburgh's Road")
 which(tram_stations$RSTNAM == "Chorlton")
 which(tram_stations$RSTNAM == "Withington")
-#map them
+#map them v3
 tm_shape(tram_stations[c(84,19,94),]) +
-  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) + 
   tm_polygons("IMDscor", title = "IMD Score", palette = "Blues", style = "jenks") +
   tm_shape(tram_stations[84,]) +
   tm_dots(tram_stations, size = 0.1, shape = 19, col = "red") +
     tm_shape(tramlines) +
   tm_lines(col = "black")
-#code does NOT work, needs to be updated
+
+#map them v4
+tm_shape(tram_stations[c(84,19,94),]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_shape(manchester_lsoa) +
+  tm_polygons(fill = "IMDscor",
+              fill.scale = tm_scale_intervals(values = "blues", style = "jenks"),
+              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_shape(tram_stations[84,]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "red") +
+  tm_shape(tramlines) +
+  tm_lines(col = "black")
 
 #plot the tram stations
 qtm(tram_stations)
@@ -231,7 +290,7 @@ tram_stations_1200_buffer <- st_buffer(tram_stations, 1200)
 qtm(tram_stations_1200_buffer)
 
 which(tram_stations_1200_buffer$RSTNAM == "St Werburgh's Road")
-#to add to our earlier example
+#to add to our earlier example v3
 tm_shape(tram_stations_1200_buffer[84,]) +
   tm_polygons(alpha=0) +
   tm_shape(tram_stations[c(84,19,94),]) +
@@ -246,9 +305,27 @@ tm_shape(tram_stations_1200_buffer[84,]) +
   tm_dots(tram_stations, size = 0.2, shape = 19, col = "black") +
   tm_shape(tram_stations[84,]) +
   tm_dots(tram_stations, size = 0.2, shape = 19, col = "red")
-#code does NOT work, needs to be updated
 
- # buffer experiment
+#to add to our earlier example v4
+tm_shape(tram_stations_1200_buffer[84,]) +
+  tm_polygons(fill_alpha=0) + 
+  tm_shape(tram_stations[c(84,19,94),]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_shape(manchester_lsoa) +
+  tm_polygons(fill = "IMDscor",
+              fill.scale = tm_scale_intervals(values = "blues", style = "jenks"),
+              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_shape(tram_stations_1200_buffer[84,]) +
+  tm_polygons(fill_alpha=0.3) + 
+  tm_shape(tramlines) +
+  tm_lines(fill = "black") +
+  tm_shape(tram_stations) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "black") + 
+  tm_shape(tram_stations[84,]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "red") 
+
+
+ # buffer experiment v3
 tram_stations_buffer <- st_buffer(tram_stations, 600)
 tm_shape(tram_stations_buffer[c(84,19,94),]) +
   tm_polygons(alpha=0) +
@@ -264,7 +341,25 @@ tm_shape(tram_stations_buffer[c(84,19,94),]) +
   tm_dots(tram_stations, size = 0.2, shape = 19, col = "black") +
   tm_shape(tram_stations[84,]) +
   tm_dots(tram_stations, size = 0.2, shape = 19, col = "red")
-#code does NOT work, needs to be updated
+
+# buffer experiment v4
+tram_stations_buffer <- st_buffer(tram_stations, 600)
+tm_shape(tram_stations_buffer[c(84,19,94),]) +
+  tm_polygons(fill_alpha=0) + 
+  tm_shape(tram_stations[c(84,19,94),]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_shape(manchester_lsoa) +
+  tm_polygons(fill = "IMDscor",
+              fill.scale = tm_scale_intervals(values = "blues", style = "jenks"),
+              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_shape(tram_stations_buffer) +
+  tm_polygons(fill_alpha=0.3) + 
+  tm_shape(tramlines) +
+  tm_lines(fill = "black") +
+  tm_shape(tram_stations) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "black") + 
+  tm_shape(tram_stations[84,]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "red") 
 
 #buffer
 tram_stations_buffer <- st_buffer(tram_stations, 600)
@@ -272,15 +367,22 @@ tram_stations_buffer <- st_buffer(tram_stations, 600)
 #point in polygon
 #convert polygons to points
 manchester_lsoa_points <- st_centroid(manchester_lsoa)
-#plot points and LSOA
+#plot points and LSOA v3
 tm_shape(manchester_lsoa) +
   tm_borders(col = "red") +
   tm_shape(manchester_lsoa_points) +
   tm_dots(manchester_lsoa_points, size = 0.1, shape = 19, col = "darkred")
-#code may hang RStudio.cloud, need to check
+
+#plot points and LSOA v4
+tm_shape(manchester_lsoa) +
+  tm_borders(col = "red") +
+  tm_shape(manchester_lsoa_points) +
+  tm_dots(points.only = "ifany", size = 0.3, fill = "darkred") 
+
+
 head(manchester_lsoa_points)
 
-#map of four station buffers with LSOA points in it
+#map of four station buffers with LSOA points in it v3
 tm_shape(tram_stations_buffer[c(84,19,94),]) +
   tm_polygons(alpha=0) +
   tm_shape(tram_stations[c(84,19,94),]) +
@@ -297,9 +399,29 @@ tm_shape(tram_stations_buffer[c(84,19,94),]) +
   tm_dots(tram_stations, size = 0.2, shape = 19, col = "black") +
   tm_shape(tram_stations[84,]) +
   tm_dots(tram_stations, size = 0.2, shape = 19, col = "red")
-#code does NOT work, needs to be updated
 
-#simpler map
+#map of four station buffers with LSOA points in it v4
+tm_shape(tram_stations_buffer[c(84,19,94),]) +
+  tm_polygons(fill_alpha=0) + 
+  tm_shape(tram_stations[c(84,19,94),]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_shape(manchester_lsoa) +
+  tm_polygons(fill = "IMDscor",
+              fill.scale = tm_scale_intervals(values = "blues", style = "jenks"),
+              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_shape(manchester_lsoa_points) +
+  tm_dots(points.only = "ifany", size = 0.3, fill = "darkred") +
+  tm_shape(tram_stations_buffer) +
+  tm_polygons(fill_alpha=0.3) + 
+  tm_shape(tramlines) +
+  tm_lines(fill = "black") +
+  tm_shape(tram_stations) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "black") + 
+  tm_shape(tram_stations[84,]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "red") 
+
+
+#simpler map v3
 tm_shape(tram_stations_buffer[c(84),]) +
   tm_polygons(alpha=0) +
   tm_shape(manchester_lsoa) + 
@@ -310,7 +432,18 @@ tm_shape(tram_stations_buffer[c(84),]) +
   tm_dots(manchester_lsoa_points, size = 0.1, shape = 19, col = "darkgreen") +
   tm_shape(tram_stations_buffer[c(84),]) +
   tm_polygons(alpha=0)
-#code may crash RStudio.cloud
+
+#simpler map v4
+tm_shape(tram_stations_buffer[c(84),]) +
+  tm_polygons(fill_alpha=0) +
+  tm_shape(manchester_lsoa) + 
+  tm_polygons() + 
+  tm_shape(tram_stations[c(84),]) +
+  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_shape(manchester_lsoa_points) +
+  tm_dots(points.only = "ifany", size = 0.3, fill = "darkgreen") +
+  tm_shape(tram_stations_buffer) +
+  tm_polygons(fill_alpha=0)
 
 #st_join is a left join
 #join each station to the LSOAs within the buffer
@@ -327,11 +460,19 @@ qtm(station_LSOA_IMD)
 station_LSOA_IMD_pt <- st_centroid(station_LSOA_IMD)
 qtm(station_LSOA_IMD_pt)
 
-#map with IMD score
+#map with IMD score v3
 tm_shape(station_LSOA_IMD) +
   tm_polygons("mean(IMDscor)", title = "IMD Score", palette = "Blues", style = "jenks") +
   tm_shape(station_LSOA_IMD_pt) +
   tm_dots(station_LSOA_IMD_pt, size = 0.1, shape = 19, col = "darkred")
+
+#map with IMD score v4
+tm_shape(station_LSOA_IMD) +
+  tm_polygons(fill = "mean(IMDscor)",
+              fill.scale = tm_scale_intervals(values = "blues", style = "jenks"),
+              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_shape(station_LSOA_IMD_pt) +
+  tm_dots(points.only = "ifany", size = 0.2, fill = "darkred")
 
 #reorder, most deprived at the top
 station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`mean(IMDscor)`, 
@@ -339,7 +480,7 @@ station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`me
 
 head(station_LSOA_IMD_pt_ordered)
 
-#plot map of average IMD score by station (top 10 in Red, bottom 10 in Blue)
+#plot map of average IMD score by station (top 10 in Red, bottom 10 in Blue) v3
 tm_shape(station_LSOA_IMD) +
   tm_polygons("mean(IMDscor)", title = "IMD Score", palette = "Blues", style = "jenks") +
   tm_shape(station_LSOA_IMD_pt_ordered) +
@@ -348,7 +489,18 @@ tm_shape(station_LSOA_IMD) +
   tm_dots(station_LSOA_IMD_pt_ordered[1:10,], size = 0.1, shape = 19, col = "red") +
   tm_shape(station_LSOA_IMD_pt_ordered[89:99,]) +
   tm_dots(station_LSOA_IMD_pt_ordered[89:99,], size = 0.1, shape = 19, col = "blue") 
-#code does NOT work, needs to be updated
+
+#plot map of average IMD score by station (top 10 in Red, bottom 10 in Blue) v4
+tm_shape(station_LSOA_IMD) +
+  tm_polygons(fill = "mean(IMDscor)",
+              fill.scale = tm_scale_intervals(values = "blues", style = "jenks"),
+              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_shape(station_LSOA_IMD_pt_ordered) +
+  tm_dots(points.only = "ifany", size = 0.2, fill = "darkred") +
+  tm_shape(station_LSOA_IMD_pt_ordered[1:10,]) +
+  tm_dots(points.only = "ifany", size = 0.2, fill = "red") +
+  tm_shape(station_LSOA_IMD_pt_ordered[89:99,]) +
+  tm_dots(points.only = "ifany", size = 0.2, fill = "blue")
 
 ## Polygon Polygon Overlay (optional exercise)
 # see st_intersection_code.R
