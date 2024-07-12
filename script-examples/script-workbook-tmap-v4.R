@@ -81,10 +81,14 @@ head(manchester_lsoa)
 lisa_colors <- lisa_colors(lisa)
 lisa_labels <- lisa_labels(lisa)
 
-#draw map
+#draw map v3
 tm_shape(manchester_lsoa) +
   tm_polygons("lisaCats", palette = lisa_colors[1:5], labels = lisa_labels[1:5])
-#code works, but needs to be updated
+
+#draw map v4
+tm_shape(manchester_lsoa) +
+  tm_polygons(fill = "lisaCats",
+              fill.scale = tm_scale_categorical(values = lisa_colors[1:5], labels = lisa_labels[1:5]))
 
 # Practical 2: Spatial Decision Making
 
