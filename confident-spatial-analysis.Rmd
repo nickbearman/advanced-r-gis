@@ -60,7 +60,7 @@ Select **Tools > Weights Manager** and click **Create**.  The following screen i
 - The neighbourhood weight matrix is saved in a file.  A suggested name is given.  This is the LSOA shape file name with a suffix of .gal.  Select **Save** and after a few seconds you should see a message **Weights file `lsoa_manchester_age_imd.gal` created successfully**.  
 - Click **OK** on this window and **Close** on the Weights File Creation window. The Weights Manager window should show the details of the neighbours you have just selected. 
 
-Click ![](images/histogram-button.png){ height=20 } and you can see how many neighbours each polygon has. In my data, five is the most common number of neighbours. Close this and open the **Connectivity Map**, which shows the neighbours for each polygon. Close this and the Weights Manager when you are happy with it. 
+Click ![](images/histogram-button.png){ height=20 } within the Weights Manager window and you can see how many neighbours each polygon has. In my data, five is the most common number of neighbours. Close this and open the **Connectivity Map**, which shows the neighbours for each polygon. Close this and the Weights Manager when you are happy with it. 
 
 ## Moran's I
 
