@@ -39,11 +39,11 @@ tm_shape(wt_imd_pt) +
 # Plot weighted IMD v4
 
 tm_shape(wt_imd_pt) +
-  tm_dots(points.only = "ifany", size = 0.2, fill = "darkred") +
+  tm_dots(size = 0.2, fill = "darkred") +
   tm_shape(wt_imd_pt[1:10,]) +
-  tm_dots(points.only = "ifany", size = 0.2, fill = "red") +
+  tm_dots(size = 0.2, fill = "red") +
   tm_shape(wt_imd_pt[89:99,]) +
-  tm_dots(points.only = "ifany", size = 0.2, fill = "blue")
+  tm_dots(size = 0.2, fill = "blue")
 
 #this is a plot using the package ggspatial (part of ggplot2) 
 # if you are interested in trying this

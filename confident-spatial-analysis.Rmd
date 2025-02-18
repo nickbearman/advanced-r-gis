@@ -1,11 +1,11 @@
 ---
-title: "Confident Spatial Analysis and Statistics in R & GeoDa"
+title: "Advanced R as a GIS: Spatial Analysis and Statistics"
 author: "Nick Bearman"
 output:
   pdf_document: default
   html_document:
     df_print: paged
-date: "Tue 16th and Wed 17th July 2024"
+date: "Thu 30th Jan and Tue 18th Feb 2025"
 ---
 
 ```{r setup, echo=FALSE}
@@ -27,6 +27,8 @@ Pros and cons using point or polygon data | `st_centroid()` *p23*
 
 
 # Practical 1: Spatial Statistics
+
+*Remember for the GeoDa bit, I will be walking through the process on screen. You can start from the section **Moran's I and LISA in R**, calculating these statistics in R on page 5*
 
 We are going to be performing some Exploratory Data Analysis using a program called GeoDa. The data we are using covers Manchester, UK. 
 
@@ -675,6 +677,8 @@ View(station_LSOA_IMD)
 ```{r, comment = NA, eval = FALSE}
 qtm(station_LSOA_IMD)
 ```
+
+**If R can't find `summarise()` try (re)loading the `dplyr` library: `library(dplyr)`. This is where the `summarise()` function lives.**
 
 The `%>%` command (known as a pipe) is a piece of code from the tidyverse. It allows you to pass the output from one function in to another function. This is sometimes known as chaining commands together. Here, we take `tram_stations_IMD`, pass it to `group_by(RSTNAM)` and then pass on to `summarise(mean(IMDscor))`. 
 
