@@ -1,4 +1,4 @@
-Software Requirements for Confident Spatial Analysis and Statistics in R & GeoDa
+Software Requirements for Advanced R as a GIS: Spatial Analysis and Statistics
 
 GeoDa (1.22 or above) http://geodacenter.github.io/download.html
 

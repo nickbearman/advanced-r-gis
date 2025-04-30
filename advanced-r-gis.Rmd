@@ -807,6 +807,6 @@ This practical was written using GeoDa 1.22.0.4 (9 Oct 2023), R 4.3.0 (2023-04-2
 
 This work (Advanced R as a GIS: Spatial Analysis and Statistics) is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/. <img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1">
 
-The latest version of the PDF is available from https://github.com/nickbearman/advanced-r-gis. This is v7.0 and this was created on `r format(Sys.time(), '%d %B %Y')`.
+The latest version of the PDF is available from https://github.com/nickbearman/advanced-r-gis. This is v7.1 and this was created on `r format(Sys.time(), '%d %B %Y')`.
 
 
