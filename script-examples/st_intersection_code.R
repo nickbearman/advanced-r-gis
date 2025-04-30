@@ -27,16 +27,7 @@ wt_imd_pt <- left_join(station_LSOA_IMD_pt, wt_imd,
 wt_imd_pt_reordered <- wt_imd_pt[order(wt_imd_pt$`mean(IMDscor)`, decreasing = TRUE), ]
 head(wt_imd_pt_reordered)
 
-# Plot weighted IMD v3
-
-tm_shape(wt_imd_pt) +
-  tm_dots(wt_imd_pt, size = 0.1, shape = 19, col = "darkred") +
-  tm_shape(wt_imd_pt[1:10,]) +
-  tm_dots(wt_imd_pt[1:10,], size = 0.1, shape = 19, col = "red") +
-  tm_shape(wt_imd_pt[81:91,]) +
-  tm_dots(wt_imd_pt[81:91,], size = 0.1, shape = 19, col = "blue") 
-
-# Plot weighted IMD v4
+# Plot weighted IMD
 
 tm_shape(wt_imd_pt) +
   tm_dots(size = 0.2, fill = "darkred") +
