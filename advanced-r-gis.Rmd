@@ -10,7 +10,7 @@ date: "Thu 30th Jan and Tue 18th Feb 2025"
 
 ```{r setup, echo=FALSE}
 #set working directory to /data-user
-knitr::opts_knit$set(root.dir = 'C:/Users/nick/Documents/work/confident-spatial-analysis/data-user')
+knitr::opts_knit$set(root.dir = 'C:/Users/nick/Documents/work/advanced-r-gis/data-user')
 ```
 
 Learning Outcomes: | Concepts & R Functions:  
@@ -461,7 +461,7 @@ Which will tell us it is `1643`. We can then plug this into some map code:
 tm_shape(manchester_lsoa[1643,]) +
   tm_borders() +
   tm_shape(tram_stations) +
-  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
+  tm_dots(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
   tm_borders() +
   tm_shape(tramlines) +
