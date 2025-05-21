@@ -1,10 +1,4 @@
 ##Script from the workbook
-  # updated version for tmap v4
-  # install using:
-  # install.packages("remotes")
-  # remotes::install_github('r-tmap/tmap')
-  # if you don't want to change your main computer setup, you can try out on posit.cloud
-  # https://nickbearman.github.io/installing-software/r-rstudio.html#posit-cloud
 
 # Practical 1: Spatial Analysis
 # Moran’s I and LISA in R (optional exercise)
@@ -134,17 +128,17 @@ head(tram_stations)
 
 #plot just tram stations
 tm_shape(tram_stations) +
-  tm_dots(points.only = "ifany", fill = "darkred")
+  tm_symbols(size = 0.4, fill = "darkred")
 
 #plot tram stations and tram lines, for context
 tm_shape(tram_stations) +
-  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_symbols(size = 0.4, fill = "darkred") +
   tm_shape(tramlines) +
   tm_lines(col = "black")
 
 #plot tram stations and LSOAs
 tm_shape(tram_stations) +
-  tm_dots(points.only = "ifany", size = 0.4, fill = "darkred") +
+  tm_symbols(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
   tm_borders()
 
@@ -286,25 +280,7 @@ tm_shape(manchester_lsoa) +
 
 head(manchester_lsoa_points)
 
-#map of four station buffers with LSOA points in it v3
-tm_shape(tram_stations_buffer[c(84,19,94),]) +
-  tm_polygons(alpha=0) +
-  tm_shape(tram_stations[c(84,19,94),]) +
-  tm_dots(tram_stations, size = 0.1, shape = 19, col = "darkred") +
-  tm_shape(manchester_lsoa) + 
-  tm_polygons("IMDscor", title = "IMD Score", palette = "Blues", style = "jenks") +
-  tm_shape(manchester_lsoa_points) +
-  tm_dots(manchester_lsoa_points, size = 0.1, shape = 19, col = "darkred") +
-  tm_shape(tram_stations_buffer) +
-  tm_polygons(alpha=0.3) +
-  tm_shape(tramlines) +
-  tm_lines(col = "black") +
-  tm_shape(tram_stations) +
-  tm_dots(tram_stations, size = 0.2, shape = 19, col = "black") +
-  tm_shape(tram_stations[84,]) +
-  tm_dots(tram_stations, size = 0.2, shape = 19, col = "red")
-
-#map of four station buffers with LSOA points in it v4
+#map of four station buffers with LSOA points in it
 
 #simpler map
 tm_shape(tram_stations_buffer[c(84),]) +
