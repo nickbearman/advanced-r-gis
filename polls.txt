@@ -17,3 +17,37 @@ What coordinate system are these coordinates likely to be in?  619301 307416
 British National Grid (Eastings & Northings) EPSG = 27700
 UTM (Universal Transverse Mercator) Zone 37 N EPSG = 32630
 Latitude and Longitude (WGS 1984) EPSG = 4326
+
+Day 2 recap:
+
+When working with grouped data, like Census data which is individual surveys grouped at the Output Area level, what do we need to remember?
+
+How old is the data
+Be careful of the MAUP (Modifiable Areal Unit Problem) when the boundaries of grouped data influence the outcome of analysis done using the data
+Be aware that we risk making an Ecological Fallacy, if we assume everyone in a (deprived) area is (deprived)
+All of the above
+
+What is the main difference between Moran's I and LISA?
+Moran's I uses queen weights, LISA uses rook weights
+Moran's I measures global patterns, LISA measures local clusters
+Moran's I is for points, LISA is for polygons
+There is no difference, they are the same statistic
+
+(used claide.ai to generate, and then tweaked)
+
+What does the following R code accomplish?
+tram_stations <- st_as_sf(metrolink_stations_CSV, coords = c('GMGRFE', 'GMGRFN'), crs = 27700)
+
+Converts a regular dataframe into a spatial points dataframe with British National Grid coordinates
+Filters the metrolink stations dataset to only show stations with valid coordinates
+Performs a spatial join of the metrolink_stations_CSV file with the tram_stations file
+Creates a buffer zone at 600m around the tram stations
+
+(used claide.ai to generate, and then tweaked)
+
+What coordinate system are these coordinates likely to be in?  
+619301 307416
+
+British National Grid (Eastings & Northings) EPSG = 27700
+UTM (Universal Transverse Mercator) Zone 37 N EPSG = 32630
+Latitude and Longitude (WGS 1984) EPSG = 4326
