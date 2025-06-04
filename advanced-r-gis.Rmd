@@ -427,9 +427,9 @@ stations_in_LSOA <- st_join(tram_stations, manchester_lsoa)
 View(stations_in_LSOA)
 ```
 
-At the moment, we have just picked one tram stations for each LSOA. Most LSOAs only have one tram station in them, so this isn't a problem. 
+We have just created a new data frame which links the tram_stations with the LSOAs. Most LSOAs only have one tram station in them, but a few LSOAs have more than one tram station in them. 
 
-However some LSOAs will have more than one tram station in them. We can see this by counting how many tram stations are in each LSOA: 
+We can see this by counting how many tram stations are in each LSOA: 
 
 *We will need to use the `dplyr` library for this - make sure you install it if you haven't got it already*
 
@@ -525,11 +525,15 @@ tm_shape(tram_stations[c(84,19,94),]) +
   tm_lines(col = "black")
 ```
 
+*You may have spotted that I used three IDs at the beginning of the map code: `c(84,19,94)`. Tmap sets the map area based on the first layer that is plotted. If we had just plotted St Werburgh's Road `c(84)` then the map would be centered on this tram station and not show the surrounding areas. So I added in two nearby stations (`19` and `94`) to show a larger area. Try it with only one station and see what it looks like!*
+
+*How did I find out which IDs to use? I actually loaded the data in QGIS and used Identify Features to click on the nearby stations to find the ones I needed. However I could also use the `tmap_mode("view")` option to see the interactive map, and use that to click on the stations.*
+
 Here, we have St Werburgh's Road (in red) and the surrounding LSOAs, coloured in blue to represent their IMD (dark blue = more deprived). However we don't know whether users of the tram come from the LSOA to the east (dark blue), south (light blue) or north (mid blue). In fact, they probably come from all three LSOAs. 
 
 <add example to powerpoint>
 
-we could look at the LSOAs that are within a set distance (for example a 15 minute walk) of each tram stop. How would this help?
+We could look at the LSOAs that are within a set distance (for example a 15 minute walk) of each tram stop. How would this help?
 
 To look at the LSOAs within a set distance, we can use a tool called a buffer. This creates a circle at a set distance around a point. 
 
