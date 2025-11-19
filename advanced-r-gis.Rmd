@@ -2,9 +2,9 @@
 title: "Advanced R as a GIS: Spatial Analysis and Statistics"
 author: "Nick Bearman"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 date: "Tue 3rd and Wed 4th June 2025"
 ---
 
@@ -45,9 +45,9 @@ Download the `tram.zip` data the website and extract the zip file.
 
 
 
-GeoDa should open a map display of the data automatically. We can create a simple choropleth map in here by right clicking on the map and then select **Change Current Map Type**. Select **Natural Breaks > 5** and choose the variable to map (we want **IMDscor**). Then a classified map will appear, similar to one we have created in RStudio. 
+GeoDa should open a map display of the data automatically. We can create a simple choropleth map in here by right clicking on the map and then select **Change Current Map Type**. Select **Natural Breaks > 5** and choose the variable to map (we want **IMDdecile**). Then a classified map will appear, similar to one we have created in RStudio. 
 
-Also open the attribute table ![Attribute Table](images/attribute-table.png){ height=30 } and a histogram ![Histogram](images/histogram.png){ height=30 } for `IMDscor`. GeoDa allows us to use brushing or linked displays. Select one of the larger bars in the histogram and you will see that the same entries are highlighted on the map and in the attribute table. You can also draw a box on the map (left-click and drag) and that will highlight the entries as well (you can drag the box around). 
+Also open the attribute table ![Attribute Table](images/attribute-table.png){ height=30 } and a histogram ![Histogram](images/histogram.png){ height=30 } for `IMDdecile`. GeoDa allows us to use brushing or linked displays. Select one of the larger bars in the histogram and you will see that the same entries are highlighted on the map and in the attribute table. You can also draw a box on the map (left-click and drag) and that will highlight the entries as well (you can drag the box around). 
 
 *How is this different to interacting with the data in RStudio, or QGIS/ArcGIS if you have used those packages? Is it better / easier to use? Or harder to use?*
 
@@ -66,16 +66,16 @@ Click ![](images/histogram-button.png){ height=20 } within the Weights Manager w
 
 ## Moran's I
 
-We can now start to explore the spatial patterns of the model we want to develop.  Click on the **Space** item on the GeoDa menu.  First we are going to look at the global indicator of spatial autocorrelation.  Select the first menu item **Univariate Moran's I**.  A list of variables is displayed.  Choose the `IMDscor` variable.  Select the weights file we created earlier. 
+We can now start to explore the spatial patterns of the model we want to develop.  Click on the **Space** item on the GeoDa menu.  First we are going to look at the global indicator of spatial autocorrelation.  Select the first menu item **Univariate Moran's I**.  A list of variables is displayed.  Choose the `IMDrank` variable.  Select the weights file we created earlier. 
 
 ![](images/morans-i.png){ height=40% }
 
-A new window opens with a scatter plot of the IMDscor variable and the lagged IMDscor variable.  The lagged IMDscor variable is the value of the IMD Score for the selected neighbourhood and its neighbours as defined when we set the spatial weights.  The scatter-plot suggests a positive correlation between the variables.  This means that there is a weak positive spatial autocorrelation. It has a value of 0.549 confirming this positive spatial autocorrelation. We will now look at the local indicators of spatial association.  
+A new window opens with a scatter plot of the IMDrank variable and the lagged IMDrank variable.  The lagged IMDrank variable is the value of the IMD Score for the selected neighbourhood and its neighbours as defined when we set the spatial weights.  The scatter-plot suggests a positive correlation between the variables.  This means that there is a weak positive spatial autocorrelation. It has a value of 0.549 confirming this positive spatial autocorrelation. We will now look at the local indicators of spatial association.  
 
 ## Local Indicators of Spatial Association (LISA)
 
 - Select **Space > Univariate Local Moran's I**. 
-- Select the `IMDscor` variable from the list displayed and select the weights file used earlier (it should be selected automatically). 
+- Select the `IMDrank` variable from the list displayed and select the weights file used earlier (it should be selected automatically). 
 - A screen with three check boxes is shown.  Check all three and click **OK**.  A number of windows are produced. 
 - The scatter plot is the same as we produced in the previous section. The two maps shown below are produced.  You will probably need to expand them to full screen to see the legends and patterns displayed. 
 
@@ -114,12 +114,12 @@ library(sf)
 library(tmap)
 ```
 
-Load the `lsoa_manchester_age_imd.shp` file from the `trams.zip` file:
+Load the `Greater_Manchester_LSOA_Age_IMD.gpkg` file from the `trams.zip` file:
 
 
 ```{r, message=FALSE, warning=FALSE, comment=NA, display=FALSE, results='hide'}
 #read in shapefile
-manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
+manchester_lsoa <- st_read("Greater_Manchester_LSOA_Age_IMD.gpkg")
 ```
 
 Calculate the spatial weights: We are using Queen weights by default, but there are also many other options. 
@@ -144,13 +144,13 @@ We can replicate the Moran's I scatter plot in R. This is not built into the RGe
 Our Moran's I scatter plot in GeoDa is the imd value on the x axis, and the lagged imd value on the Y axis. The lagged IMD value is the average value for each LSOA's neighbour, as defined using the neighbourhood tools earlier. This is termed the spatial lag (neighbourhood's average value) and we calculate this based on the weights we have just calculated:
 
 ```{r}
-lag <- spatial_lag(queen_w, manchester_lsoa['IMDscor'])
+lag <- spatial_lag(queen_w, manchester_lsoa['IMDrank'])
 ```
 ```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE,eval=FALSE}
 lag
 ```
 
-`lag` is now our lagged value (Y axis). `manchester_lsoa$IMDscor` is our IMD score (X axis). 
+`lag` is now our lagged value (Y axis). `manchester_lsoa$IMDrank` is our IMD rank (X axis). 
 
 Unfortunately they are not in the same format. The `lag` variable is a `list` and we need to make it an integer. 
 
@@ -158,7 +158,7 @@ Unfortunately they are not in the same format. The `lag` variable is a `list` an
 #unlist
 lag <- as.integer(unlist(lag))
 #extract data
-imd <- manchester_lsoa$IMDscor
+imd <- manchester_lsoa$IMDrank
 ```
 ```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE,eval=FALSE}
 #plot graph
@@ -185,13 +185,13 @@ plot(scale(imd),scale(lag), main = paste0("Moran's I: ",round(I,3)))
 abline(0,I, col = "red")
 ```
 
-We can also perform our LISA calculation. We need to extract the column we want to use (`IMDscor`) and then use that with the existing weights variable:
+We can also perform our LISA calculation. We need to extract the column we want to use (`IMDrank`) and then use that with the existing weights variable:
 
 ```{r}
 # Calculating Local Indicators of Spatial Association–LISA
 # Local Moran
 
-manchester_IMD <- manchester_lsoa["IMDscor"]
+manchester_IMD <- manchester_lsoa["IMDrank"]
 lisa <- local_moran(queen_w, manchester_IMD)
 ```
 
@@ -283,7 +283,7 @@ Next, read in some data and plot the data.
 
 ```{r, message=FALSE, display=FALSE, comment=NA, warning=FALSE, results='hide'}
 #read in data
-  manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
+  manchester_lsoa <- st_read("Greater_Manchester_LSOA_Age_IMD.gpkg")
   
 ```
 
@@ -298,30 +298,29 @@ Also, checkout what attributes we have in the data:
   head(manchester_lsoa)
 ```
 
-We have a selection of different columns here. Of particular note are the `IMDscor`, `IMDrank` and `IMDdecl` columns - containing IMD data (score, rank and decile). We also have the total number of people in each LSOA (`AllUslR`) and the population in a range of age groups. The age data we have used before - see [Introduction to Spatial Data & Using R as a GIS](https://github.com/nickbearman/intro-r-spatial-analysis) course for details.  
+We have a selection of different columns here. Of particular note are the `IMDrank` and `IMDdecl` columns - containing IMD data (rank and decile). We also have the total number of people in each LSOA (`Total`) and the population in a range of age groups. The age data we have used before - see [Introduction to Spatial Data & Using R as a GIS](https://github.com/nickbearman/intro-r-spatial-analysis) course for details.  
 
 The IMD data is new. This is the Index of Multiple Deprivation, and consists of a measure of deprivation for each LSOA. <!-- More details on IMD --> 
 
-*There are 3 measures in this data - the IMD score, rank and decile. We will primarily be using the score, where the area with the highest score is the most deprived (with a rank of 1 and in the first decile).*
+*There are 2 measures in this data - the IMD rank and decile. We will primarily be using the decile, where the area in decile 1 is the most deprived.*
 
 We can map this data by adapting our mapping code:
 
 ```{r, message=FALSE, display=FALSE, comment=NA, warning=FALSE}
 tm_shape(manchester_lsoa) +
-  tm_polygons(fill = "IMDscor",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", n = 6, style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score"))
+  tm_polygons(fill = "IMDdecile",
+              fill.scale = tm_scale_discrete(),
+              fill.legend = tm_legend(title = "IMD Decile"))
 ```
 
+It's worth mentioning we are using `tm_scale_discrete()` rather than `tm_scale_intervals` (which is what we have used before in the Introduction course) because we are mapping deciles (integers 1 through 10) rather than values we want to group. See https://tmap.geocompx.org/scales for more information. 
+
 Now we have a map of IMD by LSOA in Greater Manchester. 
-
-*You may have noticed we are using the 2011 Census LSOA boundaries. This is because the IMD data (from 2019) are only available in these boundaries, they have not been updated yet for the 2021 Census LSOA boundaries. Only 3.1% of LSOA boundaries have changed between the two censuses https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/healthandwellbeing/articles/generalhealthbyagesexanddeprivationenglandandwales/census2021.*
-
-*The next version of the IMD for England is due out in late 2025 or 2026 and usually Wales, Scotland and NI follow soon after that. More details at https://ocsi.uk/2023/07/10/we-are-updating-the-english-indices-of-deprivation/ if you are interested.*
 
 ## Public Transport Services
 
 Public transport has an important role to play in tackling deprivation. We can use RStudio to see where the trams in Manchester run and how they relate to deprived areas. 
+
 We have a selection of tram data available in the `tram.zip` file we downloaded earlier. 
   
 Load the tram line data:
@@ -436,7 +435,7 @@ We can see this by counting how many tram stations are in each LSOA:
 ```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
 #count stations in LSOA
 library(dplyr)
-stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), NAME)
+stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), name)
 ```
 
 The easiest way to view this is to open it in a `View()` tab:
@@ -447,20 +446,20 @@ View(stations_in_LSOA_count)
 
 We can then also sort the columns - click on the arrows by the **n** column. ![](images/arrows.png){ height=20 } You can see several LSOAs have more than one tram station within them, e.g. Manchester 054C. 
 
-If you look for Manchester 054C in the `stations_in_LSOA` variable - again, easiest in a `View()` tab and reorder the data - then you can see the LSOA Manchester 054C is listed three times, against each tram station it is in: **Exchange Square, Market Street and Victoria**. 
+If you look for Manchester 054C in the `stations_in_LSOA` variable - again, easiest in a `View()` tab and reorder the data - then you can see the LSOA Manchester 054C is listed three times, against each tram station it is in: **Exchange Square**, **Market Street** and **Victoria**. 
 
 We can also do this visually - which might make it easier to see what is going on. We can plot a map on one LSOA to see now many tram stations there are. 
 
-First of all we need to know which LSOA we are interested in. R uses indexes to identify things. So we know Manchester 054C has more than one station in it. We can use `which()` to find out the index of Manchester 054C.
+First of all we need to know which LSOA we are interested in. R uses indexes to identify things. So we know that Manchester 054C has more than one station in it, and we can use `which()` to find out the index of Manchester 054C.
 
 ```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
-which(manchester_lsoa$NAME == "Manchester 054C")
+which(manchester_lsoa$name == "Manchester 054C")
 ```
-Which will tell us it is `1643`. We can then plug this into some map code:
+Which will tell us it is `1610`. We can then plug this into some map code:
 
 ```{r, comment=NA,warning=FALSE,message=FALSE,error=FALSE}
 #example of LSOA with more than one tram station in
-tm_shape(manchester_lsoa[1643,]) +
+tm_shape(manchester_lsoa[1610,]) +
   tm_borders() +
   tm_shape(tram_stations) +
   tm_dots(size = 0.4, fill = "darkred") +
@@ -470,7 +469,7 @@ tm_shape(manchester_lsoa[1643,]) +
   tm_lines(col = "black")
 ```
 
-Here we see the tram stations (red dots) the tram line (black) and the LSOA boundaries (grey). *Remember the order of the map layers is key - the first one (in this case `tm_shape(manchester_lsoa[1643,])`) sets what is shown on the map, and then the rest are added in order, first to last.* 
+Here we see the tram stations (red dots) the tram line (black) and the LSOA boundaries (grey). *Remember the order of the map layers is key - the first one (in this case `tm_shape(manchester_lsoa[1610,])`) sets what is shown on the map, and then the rest are added in order, first to last.* 
 
 This is not a specific problem at the moment, as each tram station has one LSOA linked with it - but we will come back to this later on. 
 
@@ -482,7 +481,7 @@ So how do we show the stations with the most and least deprived LSOAs on the map
 There is an `order()` function in R that allows us to reorder data. This is particularly useful if we want to display the 10 most and 10 least deprived stations! This code below reorders the data within the existing variable.
 
 ```{r, comment = NA}
-stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscor, decreasing = TRUE), ]
+stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDrank, decreasing = TRUE), ]
 ```
 
 We can then plot the top and bottom 10 stations. Note that there are 99 stations in our data frame, so `[1:10,]` gives us the top ten (most deprived) and `[89:99,]` will give us the bottom ten (least deprived):
@@ -516,9 +515,9 @@ which(tram_stations$RSTNAM == "St Werburgh's Road")
 tm_shape(tram_stations[c(84,19,94),]) +
   tm_dots(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
-  tm_polygons(fill = "IMDscor",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_polygons(fill = "IMDdecile",
+              fill.scale = tm_scale_discrete(),
+              fill.legend = tm_legend(title = "IMD Decile")) +
   tm_shape(tram_stations[84,]) +
   tm_dots(size = 0.4, fill = "red") +
   tm_shape(tramlines) +
@@ -558,9 +557,9 @@ tm_shape(tram_stations_1200_buffer[84,]) +
   tm_shape(tram_stations[c(84,19,94),]) +
   tm_dots(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
-  tm_polygons(fill = "IMDscor",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_polygons(fill = "IMDdecile",
+              fill.scale = tm_scale_discrete(),
+              fill.legend = tm_legend(title = "IMD Decile")) +
   tm_shape(tram_stations_1200_buffer[84,]) +
   tm_polygons(fill_alpha=0.3) + 
   tm_shape(tramlines) +
@@ -583,9 +582,9 @@ tm_shape(tram_stations_buffer[c(84,19,94),]) +
   tm_shape(tram_stations[c(84,19,94),]) +
   tm_dots(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
-  tm_polygons(fill = "IMDscor",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_polygons(fill = "IMDdecile",
+              fill.scale = tm_scale_discrete(),
+              fill.legend = tm_legend(title = "IMD Decile")) +
   tm_shape(tram_stations_buffer) +
   tm_polygons(fill_alpha=0.3) + 
   tm_shape(tramlines) +
@@ -657,9 +656,9 @@ tm_shape(tram_stations_buffer[c(84,19,94),]) +
   tm_shape(tram_stations[c(84,19,94),]) +
   tm_dots(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
-  tm_polygons(fill = "IMDscor",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_polygons(fill = "IMDdecile",
+              fill.scale = tm_scale_discrete(),
+              fill.legend = tm_legend(title = "IMD Decile")) +
   tm_shape(manchester_lsoa_points) +
   tm_dots(size = 0.3, fill = "darkred") +
   tm_shape(tram_stations_buffer) +
@@ -685,9 +684,9 @@ The map just shows how the data relate to each other. However, to link the two w
 Each station (`tram_stations_buffer`) is listed multiple times - one for each LSOA (`manchester_lsoa_points`) which falls within the buffer. We can group this:
 
 ```{r, comment = NA}
-#group by Station, take average IMDscore. 
-  station_LSOA_IMD <- tram_stations_IMD %>% group_by(RSTNAM) %>% summarise(mean(IMDscor)) 
-#view the average IMD score for each station
+#group by Station, take average IMDdecile. 
+  station_LSOA_IMD <- tram_stations_IMD %>% group_by(RSTNAM) %>% summarise(mean(IMDdecile)) 
+#view the average IMD decile for each station
 View(station_LSOA_IMD)
 ```
 ```{r, comment = NA, eval = FALSE}
@@ -696,9 +695,9 @@ qtm(station_LSOA_IMD)
 
 **If R can't find `summarise()` try (re)loading the `dplyr` library: `library(dplyr)`. This is where the `summarise()` function lives.**
 
-The `%>%` command (known as a pipe) is a piece of code from the tidyverse. It allows you to pass the output from one function in to another function. This is sometimes known as chaining commands together. Here, we take `tram_stations_IMD`, pass it to `group_by(RSTNAM)` and then pass on to `summarise(mean(IMDscor))`. 
+The `%>%` command (known as a pipe) is a piece of code from the tidyverse. It allows you to pass the output from one function in to another function. This is sometimes known as chaining commands together. Here, we take `tram_stations_IMD`, pass it to `group_by(RSTNAM)` and then pass on to `summarise(mean(IMDdecile))`. 
 
-Now we have each station buffer listed once, with the average IMD score (`mean(IMDscor)`). Currently they are still the buffers, which won't make sense to map, so we can convert them back to points (centroids):
+Now we have each station buffer listed once, with the average IMD decile (`mean(IMDdecile)`). Currently they are still the buffers, which won't make sense to map, so we can convert them back to points (centroids):
 
 ```{r, comment = NA}
 #still buffers (of each station), so convert to points (centroids)
@@ -712,9 +711,9 @@ Now we can map them with the IMD score:
 
 ```{r, comment = NA, eval = FALSE}
 tm_shape(station_LSOA_IMD) +
-  tm_polygons(fill = "mean(IMDscor)",
+  tm_polygons(fill = "mean(IMDdecile)",
               fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+              fill.legend = tm_legend(title = "Average IMD Decile")) +
   tm_shape(station_LSOA_IMD_pt) +
   tm_dots(size = 0.2, fill = "darkred")
 ```
@@ -723,16 +722,16 @@ We can then reorder them, and map them according to the IMD:
 
 ```{r, comment = NA}
 #reorder, most deprived at the top
-station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`mean(IMDscor)`, 
+station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`mean(IMDdecile)`, 
             decreasing = TRUE), ]
 
 head(station_LSOA_IMD_pt_ordered)
 
 #plot map of average IMD score by station (top 10 in Red, bottom 10 in Blue)
 tm_shape(station_LSOA_IMD) +
-  tm_polygons(fill = "mean(IMDscor)",
+  tm_polygons(fill = "mean(IMDdecile)",
               fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+              fill.legend = tm_legend(title = "Average IMD Decile")) +
   tm_shape(station_LSOA_IMD_pt_ordered) +
   tm_dots(size = 0.2, fill = "darkred") +
   tm_shape(station_LSOA_IMD_pt_ordered[1:10,]) +
@@ -753,7 +752,7 @@ We now have the average deprivation for each tram stop.
 There are many different ways to improve this analysis. If you want, have a go at one or two of the options below:
 
 - Try running the analysis with a different buffer. How easy is this within R to change the buffer to 1km (1000m) compared to another GIS? 
-- We calculated the average (`mean(IMDscor)`) IMD score for each tram station catchment area. Are there better measures for quantifying who has access, given we are interested in looking at access for the most deprived areas. Would `max(IMDscor)`, to show the most deprived LSOA, be more useful? Can you update the code for this?
+- We calculated the average (`mean(IMDrank)`) IMD rank for each tram station catchment area. Are there better measures for quantifying who has access, given we are interested in looking at access for the most deprived areas. Would `max(IMDrank)`, to show the most deprived LSOA, be more useful? Can you update the code for this?
 
 Next up we have two optional exercises: **Polygon Polygon Overlay** and **Future Tram Expansion**. Do try one, or both of these, if you have time. 
 
@@ -811,6 +810,6 @@ This practical was written using GeoDa 1.22.0.4 (9 Oct 2023), R 4.3.0 (2023-04-2
 
 This work (Advanced R as a GIS: Spatial Analysis and Statistics) is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/. <img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1">
 
-The latest version of the PDF is available from https://github.com/nickbearman/advanced-r-gis. This is v7.1 and this was created on `r format(Sys.time(), '%d %B %Y')`.
+The latest version of the PDF is available from https://github.com/nickbearman/advanced-r-gis. This is v7.2 and this was created on `r format(Sys.time(), '%d %B %Y')`.
 
 

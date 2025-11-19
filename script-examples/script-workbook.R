@@ -9,7 +9,7 @@ library(tmap)
 setwd("~/work/advanced-r-gis/data-user")
 
 #read in shapefile
-manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
+manchester_lsoa <- st_read("Greater_Manchester_LSOA_Age_IMD.gpkg")
 
 # Calculate Spatial Weights
 queen_w <- queen_weights(manchester_lsoa)
@@ -23,14 +23,14 @@ cat("\nNeighbors of the 1-st observation are:", nbrs)
 ####
 
 
-lag <- spatial_lag(queen_w, manchester_lsoa['IMDscor'])
+lag <- spatial_lag(queen_w, manchester_lsoa['IMDrank'])
 lag
 
 #unlist
 lag <- as.integer(unlist(lag))
 
 #extract data
-imd <- manchester_lsoa$IMDscor
+imd <- manchester_lsoa$IMDrank
 
 plot(imd,lag)
 plot(scale(imd),scale(lag))
@@ -48,7 +48,7 @@ abline(0,I, col = "red")
 
 # Calculating Local Indicators of Spatial Association–LISA
 # Local Moran
-manchester_IMD <- manchester_lsoa["IMDscor"]
+manchester_IMD <- manchester_lsoa["IMDrank"]
 lisa <- local_moran(queen_w, manchester_IMD)
 
 #Get the values of the local Moran's I
@@ -88,20 +88,23 @@ library(sf)
 library(tmap)
 
 #read in data
-setwd("~/work/confident-spatial-analysis/data-user")
-manchester_lsoa <- st_read("lsoa_manchester_age_imd.shp")
+setwd("~/work/advanced-r-gis/data-user")
+manchester_lsoa <- st_read("Greater_Manchester_LSOA_Age_IMD.gpkg")
 
 #plot data
 qtm(manchester_lsoa)
 head(manchester_lsoa)
 
-#these are 2011 LSOAs. Need to wait for IMD to update to 2021 LSOAs
+# these are 2021 LSOAs. Note column name: lsoa21cd. IMD is from 2025. 
 
 #map of imd
 tm_shape(manchester_lsoa) +
-  tm_polygons(fill = "IMDscor",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", n = 6, style = "jenks"),
+  tm_polygons(fill = "IMDdecile",
+              fill.scale = tm_scale_discrete(),
               fill.legend = tm_legend(title = "IMD Score"))
+# we use scale discrete because we are mapping deciles (integers 1 through 10)
+# rather than values we want to group (tm_scale_intervals)
+# see https://tmap.geocompx.org/scales for more info
 
 ## public transport services
 
@@ -152,14 +155,15 @@ View(stations_in_LSOA)
 
 #count stations in LSOA
 library(dplyr)
-stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), NAME)
+stations_in_LSOA_count <- count(as_tibble(stations_in_LSOA), name)
 
 View(stations_in_LSOA_count)
 
-which(manchester_lsoa$NAME == "Manchester 054C")
+#example of LSOA with just one tram station in
 
-#example of LSOA with one tram station in
-tm_shape(manchester_lsoa[918,]) +
+which(manchester_lsoa$name == "Tameside 014B")
+
+tm_shape(manchester_lsoa[1139,]) +
   tm_borders() +
   tm_shape(tram_stations) +
   tm_dots(size = 0.4, fill = "darkred") +
@@ -168,18 +172,23 @@ tm_shape(manchester_lsoa[918,]) +
   tm_shape(tramlines) +
   tm_lines(col = "black")
 
+
 #example of LSOA with more than one tram station in
-tm_shape(manchester_lsoa[1643,]) +
+
+which(manchester_lsoa$name == "Manchester 054C")
+
+tm_shape(manchester_lsoa[1610,]) +
   tm_borders() +
   tm_shape(tram_stations) +
   tm_dots(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
-  tm_borders() +
+  tm_borders(col = "grey") +
   tm_shape(tramlines) +
   tm_lines(col = "black")
 
+
 ## Showing Most and Least Deprived Stations
-stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDscor, decreasing = TRUE), ]
+stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDrank, decreasing = TRUE), ]
 
 #plot all stations
 tm_shape(stations_in_LSOA) +
@@ -209,9 +218,9 @@ which(tram_stations$RSTNAM == "Withington")
 tm_shape(tram_stations[c(84,19,94),]) +
   tm_dots(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
-  tm_polygons(fill = "IMDscor",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_polygons(fill = "IMDdecile",
+              fill.scale = tm_scale_discrete(),
+              fill.legend = tm_legend(title = "IMD Decile")) +
   tm_shape(tram_stations[84,]) +
   tm_dots(size = 0.4, fill = "red") +
   tm_shape(tramlines) +
@@ -232,9 +241,9 @@ tm_shape(tram_stations_1200_buffer[84,]) +
   tm_shape(tram_stations[c(84,19,94),]) +
   tm_dots(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
-  tm_polygons(fill = "IMDscor",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_polygons(fill = "IMDdecile",
+              fill.scale = tm_scale_discrete(),
+              fill.legend = tm_legend(title = "IMD Decile")) +
   tm_shape(tram_stations_1200_buffer[84,]) +
   tm_polygons(fill_alpha=0.3) + 
   tm_shape(tramlines) +
@@ -253,9 +262,9 @@ tm_shape(tram_stations_buffer[c(84,19,94),]) +
   tm_shape(tram_stations[c(84,19,94),]) +
   tm_dots(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
-  tm_polygons(fill = "IMDscor",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_polygons(fill = "IMDdecile",
+              fill.scale = tm_scale_discrete(),
+              fill.legend = tm_legend(title = "IMD Decile")) +
   tm_shape(tram_stations_buffer) +
   tm_polygons(fill_alpha=0.3) + 
   tm_shape(tramlines) +
@@ -300,9 +309,9 @@ tm_shape(tram_stations_buffer[c(84,19,94),]) +
   tm_shape(tram_stations[c(84,19,94),]) +
   tm_dots(size = 0.4, fill = "darkred") +
   tm_shape(manchester_lsoa) +
-  tm_polygons(fill = "IMDscor",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+  tm_polygons(fill = "IMDdecile",
+              fill.scale = tm_scale_discrete(),
+              fill.legend = tm_legend(title = "IMD Decile")) +
   tm_shape(manchester_lsoa_points) +
   tm_dots(size = 0.3, fill = "darkred") +
   tm_shape(tram_stations_buffer) +
@@ -319,9 +328,9 @@ tm_shape(tram_stations_buffer[c(84,19,94),]) +
 tram_stations_IMD <- st_join(tram_stations_buffer, manchester_lsoa_points)
 View(tram_stations_IMD)
      
-#group by Station, take average IMDscore.
-station_LSOA_IMD <- tram_stations_IMD %>% group_by(RSTNAM) %>% summarise(mean(IMDscor))
-#view the average IMD score for each station
+#group by Station, take average IMD decile.
+station_LSOA_IMD <- tram_stations_IMD %>% group_by(RSTNAM) %>% summarise(mean(IMDdecile))
+#view the average IMD decile for each station
 View(station_LSOA_IMD)
 qtm(station_LSOA_IMD)
 
@@ -331,23 +340,23 @@ qtm(station_LSOA_IMD_pt)
 
 #map with IMD score
 tm_shape(station_LSOA_IMD) +
-  tm_polygons(fill = "mean(IMDscor)",
+  tm_polygons(fill = "mean(IMDdecile)",
               fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+              fill.legend = tm_legend(title = "Average IMD Decile")) +
   tm_shape(station_LSOA_IMD_pt) +
   tm_dots(size = 0.2, fill = "darkred")
 
 #reorder, most deprived at the top
-station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`mean(IMDscor)`, 
+station_LSOA_IMD_pt_ordered <- station_LSOA_IMD_pt[order(station_LSOA_IMD_pt$`mean(IMDdecile)`, 
                                                          decreasing = TRUE), ]
 
 head(station_LSOA_IMD_pt_ordered)
 
 #plot map of average IMD score by station (top 10 in Red, bottom 10 in Blue)
 tm_shape(station_LSOA_IMD) +
-  tm_polygons(fill = "mean(IMDscor)",
+  tm_polygons(fill = "mean(IMDdecile)",
               fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
-              fill.legend = tm_legend(title = "IMD Score")) +
+              fill.legend = tm_legend(title = "Average IMD Decile")) +
   tm_shape(station_LSOA_IMD_pt_ordered) +
   tm_dots(size = 0.2, fill = "darkred") +
   tm_shape(station_LSOA_IMD_pt_ordered[1:10,]) +

@@ -8,7 +8,7 @@ wt_imd <- st_intersection(tram_stations_buffer,
   group_by(RSTNAM) %>% 
   mutate(prop_area = as.numeric(area/sum(area)),
          sum_area = sum(area)) %>% 
-  summarise(wt_mean_imd = sum(prop_area * IMDscor)) %>% 
+  summarise(wt_mean_imd = sum(prop_area * IMDdecile)) %>% 
   ungroup() %>% 
   as_tibble()
 
@@ -24,7 +24,7 @@ wt_imd <- st_intersection(tram_stations_buffer,
 wt_imd_pt <- left_join(station_LSOA_IMD_pt, wt_imd, 
                        by = "RSTNAM")
 
-wt_imd_pt_reordered <- wt_imd_pt[order(wt_imd_pt$`mean(IMDscor)`, decreasing = TRUE), ]
+wt_imd_pt_reordered <- wt_imd_pt[order(wt_imd_pt$`mean(IMDdecile)`, decreasing = TRUE), ]
 head(wt_imd_pt_reordered)
 
 # Plot weighted IMD
@@ -42,9 +42,8 @@ library(ggplot2)
 library(ggspatial)
 library(prettymapr)
 ggplot(wt_imd_pt) +
-  ggspatial::annotation_map_tile(zoomin = 1) +
   geom_sf(aes(colour = wt_mean_imd), size = 4) +
-  scale_colour_continuous("Weighted IMD", type = "viridis") +
+  scale_colour_continuous("Weighted IMD Decile", type = "viridis") +
   theme_void()
 
 ##Many thanks to Tom Cunningham, who wrote this and shared it on 2023-05-04
