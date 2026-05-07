@@ -22,6 +22,15 @@ cat("\nNeighbors of the 1-st observation are:", nbrs)
 
 ####
 
+# We can replicate the Moran’s I scatter plot in R. This is not built into the 
+# RGeoDa library, so there is a bit of leg work to replicate it. If you are interested 
+# in the background, have a look at https://github.com/GeoDaCenter/rgeoda/issues/41.
+
+# Our Moran’s I scatter plot in GeoDa is the imd value on the x axis, and the lagged 
+# imd value on the Y axis. The lagged IMD value is the average value for each LSOA’s 
+# neighbour, as defined using the neighbourhood tools earlier. This is termed the
+# spatial lag (neighbourhood’s average value) and we calculate this based on the 
+# weights we have just calculated:
 
 lag <- spatial_lag(queen_w, manchester_lsoa['IMDrank'])
 lag
@@ -43,7 +52,7 @@ plot(scale(imd),scale(lag), main = paste0("Moran's I: ",round(I,3)))
 #add line
 abline(0,I, col = "red")
 
-  ####
+####
 
 
 # Calculating Local Indicators of Spatial Association–LISA

@@ -2,10 +2,10 @@
 title: "Advanced R as a GIS: Spatial Analysis and Statistics"
 author: "Nick Bearman"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
-date: "Tue 3rd and Wed 4th June 2025"
+date: "Tue 19th and Wed 20th May 2026"
 ---
 
 ```{r setup, echo=FALSE}
@@ -28,7 +28,7 @@ Pros and cons using point or polygon data | `st_centroid()` *p23*
 
 # Practical 1: Spatial Statistics
 
-*Remember for the GeoDa bit, I will be walking through the process on screen. You can start from the section **Moran's I and LISA in R**, calculating these statistics in R on page 5*
+<!-- *Remember for the GeoDa bit, I will be walking through the process on screen. You can start from the section **Moran's I and LISA in R**, calculating these statistics in R on page 5* -->
 
 We are going to be performing some Exploratory Data Analysis using a program called GeoDa. The data we are using covers Manchester, UK. 
 
@@ -38,16 +38,16 @@ Download the `tram.zip` data the website and extract the zip file.
 
 - Click **Start > GeoDa** 
 - When GeoDa opens, click on the folder icon 
-- Select **ESRI Shapefile (.shp)** 
-- Browse to and open **lsoa_manchester_age_imd.shp** 
+- Select **GeoPackage (\*.gpkg)** 
+- Browse to and open **Greater_Manchester_LSOA_Age_IMD.gpkg** 
+- Select **OK** to open the layer called **Greater_Manchester_LSOA_Age_IMD**. 
 
-![](images/geoda-file-open-shape-file.png){ height=30% }
+![](images/geoda-file-open-gpkg.png){ height=30% }
 
 
+GeoDa should open a map display of the data automatically. We can create a simple choropleth map in here by right clicking on the map and then select **Change Current Map Type**. Select **Natural Breaks > 5** and choose the variable to map (we want **imddecile**). Then a classified map will appear, similar to one we have created in RStudio. 
 
-GeoDa should open a map display of the data automatically. We can create a simple choropleth map in here by right clicking on the map and then select **Change Current Map Type**. Select **Natural Breaks > 5** and choose the variable to map (we want **IMDdecile**). Then a classified map will appear, similar to one we have created in RStudio. 
-
-Also open the attribute table ![Attribute Table](images/attribute-table.png){ height=30 } and a histogram ![Histogram](images/histogram.png){ height=30 } for `IMDdecile`. GeoDa allows us to use brushing or linked displays. Select one of the larger bars in the histogram and you will see that the same entries are highlighted on the map and in the attribute table. You can also draw a box on the map (left-click and drag) and that will highlight the entries as well (you can drag the box around). 
+Also open the attribute table ![Attribute Table](images/attribute-table.png){ height=30 } and a histogram ![Histogram](images/histogram.png){ height=30 } for `imddecile`. GeoDa allows us to use brushing or linked displays. Select one of the larger bars in the histogram and you will see that the same entries are highlighted on the map and in the attribute table. You can also draw a box on the map (left-click and drag) and that will highlight the entries as well (you can drag the box around). 
 
 *How is this different to interacting with the data in RStudio, or QGIS/ArcGIS if you have used those packages? Is it better / easier to use? Or harder to use?*
 
@@ -57,37 +57,41 @@ Select **Tools > Weights Manager** and click **Create**.  The following screen i
 
 ![](images/weights.png){ height=40% }
 
-- Select **Add ID Variable...** and accept the default name.  
+- Select **Add ID Variable...** and click **Add Variable** to accept the default name.  
 - You now need to choose the neighbourhood weight method.  Select **Queen contiguity** and click **Create**.  
-- The neighbourhood weight matrix is saved in a file.  A suggested name is given.  This is the LSOA shape file name with a suffix of .gal.  Select **Save** and after a few seconds you should see a message **Weights file `lsoa_manchester_age_imd.gal` created successfully**.  
+- The neighbourhood weight matrix is saved in a file.  A suggested name is given.  This is the LSOA shape file name with a suffix of .gal.  Select **Save** and after a few seconds you should see a message **Weights file `Greater_Manchester_LSOA_Age_IMD.gal` created successfully**.  
 - Click **OK** on this window and **Close** on the Weights File Creation window. The Weights Manager window should show the details of the neighbours you have just selected. 
 
-Click ![](images/histogram-button.png){ height=20 } within the Weights Manager window and you can see how many neighbours each polygon has. In my data, five is the most common number of neighbours. Close this and open the **Connectivity Map**, which shows the neighbours for each polygon. Close this and the Weights Manager when you are happy with it. 
+Click ![](images/histogram-button.png){ height=30 } within the Weights Manager window and you can see how many neighbours each polygon has. In my data, five is the most common number of neighbours. Close this and open the **Connectivity Map**, which shows the neighbours for each polygon. Close this and the Weights Manager when you are happy with it. 
 
 ## Moran's I
 
-We can now start to explore the spatial patterns of the model we want to develop.  Click on the **Space** item on the GeoDa menu.  First we are going to look at the global indicator of spatial autocorrelation.  Select the first menu item **Univariate Moran's I**.  A list of variables is displayed.  Choose the `IMDrank` variable.  Select the weights file we created earlier. 
+We can now start to explore the spatial patterns of the model we want to develop.  Click on the **Space** menu on the GeoDa window.  First we are going to look at the global indicator of spatial autocorrelation.  Select the first menu item **Univariate Moran's I**.  A list of variables is displayed.  Choose the `imdrank` variable.  Select the weights file we created earlier. 
 
 ![](images/morans-i.png){ height=40% }
 
-A new window opens with a scatter plot of the IMDrank variable and the lagged IMDrank variable.  The lagged IMDrank variable is the value of the IMD Score for the selected neighbourhood and its neighbours as defined when we set the spatial weights.  The scatter-plot suggests a positive correlation between the variables.  This means that there is a weak positive spatial autocorrelation. It has a value of 0.549 confirming this positive spatial autocorrelation. We will now look at the local indicators of spatial association.  
+A new window opens with a scatter plot of the imdrank variable and the lagged imdrank variable.  The lagged imdrank variable is the value of the IMD Rank for the selected neighbourhood and its neighbours as defined when we set the spatial weights.  The scatter-plot suggests a positive correlation between the variables.  This means that there is a weak positive spatial autocorrelation. It has a value of 0.565 confirming this positive spatial autocorrelation. We will now look at the local indicators of spatial association.  
 
-## Local Indicators of Spatial Association (LISA)
+## Local Moran's I / Local Indicators of Spatial Association (LISA)
 
 - Select **Space > Univariate Local Moran's I**. 
-- Select the `IMDrank` variable from the list displayed and select the weights file used earlier (it should be selected automatically). 
+- Select the `imdrank` variable from the list displayed and select the weights file used earlier (it should be selected automatically). 
 - A screen with three check boxes is shown.  Check all three and click **OK**.  A number of windows are produced. 
 - The scatter plot is the same as we produced in the previous section. The two maps shown below are produced.  You will probably need to expand them to full screen to see the legends and patterns displayed. 
 
-![](images/lisa.png){ height=35% }
+![](images/lisa-high-low.png){ height=35% }
+
+![](images/lisa-sig.png){ height=35% }
 
 The first map shows the extent to which neighbouring areas are clustered:  
   
-- red areas are neighbourhoods with a high proportion of deprived areas surrounded by similar neighbourhoods 
-- darker blue areas are neighbourhoods with a low proportion of deprived areas surrounded by similar neighbourhoods 
-- lighter blue areas are neighbourhoods with a low proportion of deprived areas surrounded by neighbourhoods with a high proportion of deprived areas 
-- pink areas are neighbourhoods with a high proportion of deprived areas surrounded by neighbourhoods with a low proportion of deprived areas 
+- darker blue areas are deprived neighbourhoods (ranks 21, 24, 28,etc.) surrounded by similarly deprived neighbourhoods 
+- red areas are well-off neighbourhoods (ranks 33688, 33744, 33750, etc.) surrounded by similarly well-off neighbourhoods 
+- pink areas are well-off neighbourhoods surrounded by deprived neighbourhoods 
+- lighter blue areas are deprived neighbourhoods surrounded by well-off neighbourhoods 
 - white areas are neighbourhoods where the surrounding neighbourhoods do not generate a statistically significant relationship. 
+
+*Remember the ranks are for the whole country, out of 33,755 LSOAs across England. If you want to order the data by the `imdrank` column in the attribute table view, double click on the column header*. 
 
 The second map shows the level of statistical significance.  The values are 0.05, 0.01 and 0.001.
 
@@ -767,7 +771,7 @@ One potential way to more accurately represent the population who are within the
 
 *This is a very common approached used with population, e.g. if 68% of the LSOA area is within the buffer zone, then it makes sense to assume 68% of the population could make use of the tram station.*
 
-We can extend this to IMD score, with the assumption if 68% of one deprived area is within the tram station catchment area, but 100% of a different area is within the catchment area of a different tram station, it is more important to prioritise the deprived area with 100% coverage than the one with 68% coverage. Therefore a 100% weight is given to one, and only a 68% weight is given to another. 
+We can extend this to IMD score, with the assumption if 68% of one deprived area is within the tram station catchment area, but 100% of a different area is within the catchment area of a different tram station, it is more important to prioritise the deprived area with 100% coverage than the one with 68% coverage. Therefore a 100% weight is given to one, and only a 68% weight is given to another. We can calculate the weights by measuring the area of the LSOA within the buffer (e.g 70% of the LSOA, which is 80m^2, and then if 40% of a different LSOA is in the buffer, this area would be 38m^2). We then total up all the areas and work out the proportion of the buffer that that area is. 
 
 So how can we do this in R? When faced with a question like this, often Stack Exchange has some useful posts. Have a read of this post http://gis.stackexchange.com/questions/140504/extracting-intersection-areas-in-r for some interesting suggestions, particularly using the `sf` library at the bottom of the post. 
 
@@ -806,7 +810,7 @@ There is only funding to build one route, and we need to chose which one to buil
 -----
 
   
-This practical was written using GeoDa 1.22.0.4 (9 Oct 2023), R 4.3.0 (2023-04-21) and RStudio 2023.06.0 by Dr. Nick Bearman (nick@nickbearman.com). It has also been tested in R 4.4.3 (2025-02-28) and RStudio 2024.04.2 (RStudio Cloud).
+This practical was written using GeoDa 1.22.0.21 (25 September 2025), R 4.3.0 (2023-04-21) and RStudio 2023.06.0 by Dr. Nick Bearman (nick@nickbearman.com). It has also been tested in R 4.4.3 (2025-02-28) and RStudio 2024.04.2 (RStudio Cloud).
 
 This work (Advanced R as a GIS: Spatial Analysis and Statistics) is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/. <img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1">
 
