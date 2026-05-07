@@ -143,6 +143,7 @@ tm_shape(area_IMD_perTramStation) +
   tm_shape(area_IMD_perTramStation_ordered[89:99,]) +
   tm_dots(size = 0.5, fill = "blue")
 
-#the artefacts in the buffers are from the st_intersection - they are the LSOA boundaries
+#the artefacts in the buffers are from the st_intersection - they are 
+#the LSOA boundaries
 
-# Thanks to Dave who sahred this on 2025-11-26
+# Thanks to Dave who shared this on 2025-11-26

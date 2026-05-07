@@ -115,7 +115,7 @@ tm_shape(manchester_lsoa) +
 # rather than values we want to group (tm_scale_intervals)
 # see https://tmap.geocompx.org/scales for more info
 
-## public transport services
+## Public Transport Services
 
 # read in tramlines
 tramlines <- st_read("Metrolink_Lines_Functional.shp")
@@ -197,6 +197,7 @@ tm_shape(manchester_lsoa[1610,]) +
 
 
 ## Showing Most and Least Deprived Stations
+
 stations_in_LSOA <- stations_in_LSOA[order(stations_in_LSOA$IMDrank, decreasing = TRUE), ]
 
 #plot all stations

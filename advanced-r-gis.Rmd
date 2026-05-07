@@ -416,6 +416,8 @@ tm_shape(tram_stations) +
   tm_borders()
 ```
 
+It's worth noting that we can plot maps with multiple layers. With `tmap` each layer needs to have a `tm_shape()` function first and then a second `tm_*` function. Which function we use depends on what type of data we are working with (i.e. points, lines or polygons) and how we want to show it (e.g. fill or outline). We often use `tm_polygons()` to fill polygons, and above we have used `tm_borders()` to show just borders (i.e. no fill) and `tm_sybmols()` to show points. 
+
 ## IMD of Tram Station Catchment Areas
 
 Now we know where the tram stations are, and we can overlay that with the LSOA data as we showed in the previous map. 
@@ -810,7 +812,7 @@ There is only funding to build one route, and we need to chose which one to buil
 -----
 
   
-This practical was written using GeoDa 1.22.0.21 (25 September 2025), R 4.3.0 (2023-04-21) and RStudio 2023.06.0 by Dr. Nick Bearman (nick@nickbearman.com). It has also been tested in R 4.4.3 (2025-02-28) and RStudio 2024.04.2 (RStudio Cloud).
+This practical was written using GeoDa 1.22.0.21 (25 September 2025), R 4.5.3 (2026-03-11), RStudio 2026.01.1+403 and `tmap` 4.2 by Dr. Nick Bearman (nick@nickbearman.com). It has also been tested in Posit Cloud, with R 4.6.0 (2026-04-24), RStudio 2026.01.1+403 and `tmap` 4.3. 
 
 This work (Advanced R as a GIS: Spatial Analysis and Statistics) is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/. <img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1">
 
