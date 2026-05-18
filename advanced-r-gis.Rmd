@@ -2,9 +2,9 @@
 title: "Advanced R as a GIS: Spatial Analysis and Statistics"
 author: "Nick Bearman"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 date: "Tue 19th and Wed 20th May 2026"
 ---
 
@@ -29,6 +29,8 @@ Pros and cons using point or polygon data | `st_centroid()` *p23*
 # Practical 1: Spatial Statistics
 
 <!-- *Remember for the GeoDa bit, I will be walking through the process on screen. You can start from the section **Moran's I and LISA in R**, calculating these statistics in R on page 5* -->
+
+*A video recording of me working through practical 1 in GeoDa is available on [YouTube](https://youtu.be/huPDY9W62EU).*
 
 We are going to be performing some Exploratory Data Analysis using a program called GeoDa. The data we are using covers Manchester, UK. 
 
