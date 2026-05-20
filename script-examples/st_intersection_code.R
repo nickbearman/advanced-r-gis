@@ -147,3 +147,40 @@ tm_shape(area_IMD_perTramStation) +
 #the LSOA boundaries
 
 # Thanks to Dave who shared this on 2025-11-26
+
+##calculate area of LSOA that is within the area of the buffer
+
+#add column showing area of each buffer
+buffer <- buffer %>%
+  mutate(buffer_area= as.numeric(st_area(.)))
+
+#overlap between lsoa and tram station buffers
+pi <- st_intersection(manchester_lsoa, buffer)
+
+#area of overlap per buffer
+pi$area <- st_area(pi)
+#change area to numeric
+pi$area <- as.numeric(pi$area)
+
+#get proportion of lsoa parts in each buffer
+pi <- pi %>%
+  mutate(perc_overlap = area/buffer_area)
+
+
+#weighting
+#dividing the decile by the proportion of overlap
+#e.g.1 divided by 6.2 = 1.59
+pi <- pi %>%
+  mutate(perc_score = IMDdecile*perc_overlap)
+
+#for each buffer area (RSTNAM), 
+weighted_imd <- pi %>%
+  group_by(RSTNAM) %>%
+  summarise(sum_scores = sum(perc_score))
+
+
+tm_shape(weighted_imd) +
+  tm_polygons("sum_scores")
+
+# Thanks to Eleanor Ferreira who shared this on 2026-05-20
+
