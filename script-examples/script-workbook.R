@@ -374,5 +374,14 @@ tm_shape(station_LSOA_IMD) +
   tm_shape(station_LSOA_IMD_pt_ordered[89:99,]) +
   tm_dots(size = 0.2, fill = "blue")
 
+#plot map of average IMD score by station (top 10 in Red, bottom 10 in Blue)
+#without the IMD data
+tm_shape(station_LSOA_IMD_pt_ordered) +
+  tm_dots(size = 0.4, fill = "darkred") +
+  tm_shape(station_LSOA_IMD_pt_ordered[1:10,]) +
+  tm_dots(size = 0.4, fill = "red") +
+  tm_shape(station_LSOA_IMD_pt_ordered[89:99,]) +
+  tm_dots(size = 0.4, fill = "blue")
+
 ## Polygon Polygon Overlay (optional exercise)
 # see st_intersection_code.R
