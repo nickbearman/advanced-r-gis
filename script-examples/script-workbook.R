@@ -351,7 +351,7 @@ qtm(station_LSOA_IMD_pt)
 #map with IMD score
 tm_shape(station_LSOA_IMD) +
   tm_polygons(fill = "mean(IMDdecile)",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
+              fill.scale = tm_scale_intervals(),
               fill.legend = tm_legend(title = "Average IMD Decile")) +
   tm_shape(station_LSOA_IMD_pt) +
   tm_dots(size = 0.2, fill = "darkred")
@@ -365,7 +365,7 @@ head(station_LSOA_IMD_pt_ordered)
 #plot map of average IMD score by station (top 10 in Red, bottom 10 in Blue)
 tm_shape(station_LSOA_IMD) +
   tm_polygons(fill = "mean(IMDdecile)",
-              fill.scale = tm_scale_intervals(values = "brewer.blues", style = "jenks"),
+              fill.scale = tm_scale_intervals(),
               fill.legend = tm_legend(title = "Average IMD Decile")) +
   tm_shape(station_LSOA_IMD_pt_ordered) +
   tm_dots(size = 0.2, fill = "darkred") +
