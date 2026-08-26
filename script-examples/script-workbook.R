@@ -239,14 +239,14 @@ tm_shape(tram_stations[c(84,19,94),]) +
 #plot the tram stations
 qtm(tram_stations)
 #calculate the buffer (distance is 1200 meters)
-tram_stations_1200_buffer <- st_buffer(tram_stations, 1200)
+tram_stations_buffer <- st_buffer(tram_stations, 1200)
 #plot the buffer
-qtm(tram_stations_1200_buffer)
+qtm(tram_stations_buffer)
 
-which(tram_stations_1200_buffer$RSTNAM == "St Werburgh's Road")
+which(tram_stations_buffer$RSTNAM == "St Werburgh's Road")
 
 #to add to our earlier example
-tm_shape(tram_stations_1200_buffer[84,]) +
+tm_shape(tram_stations_buffer[84,]) +
   tm_polygons(fill_alpha=0) + 
   tm_shape(tram_stations[c(84,19,94),]) +
   tm_dots(size = 0.4, fill = "darkred") +
@@ -254,7 +254,7 @@ tm_shape(tram_stations_1200_buffer[84,]) +
   tm_polygons(fill = "IMDdecile",
               fill.scale = tm_scale_discrete(),
               fill.legend = tm_legend(title = "IMD Decile")) +
-  tm_shape(tram_stations_1200_buffer[84,]) +
+  tm_shape(tram_stations_buffer[84,]) +
   tm_polygons(fill_alpha=0.3) + 
   tm_shape(tramlines) +
   tm_lines(col = "black") +

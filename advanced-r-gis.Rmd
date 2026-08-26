@@ -555,15 +555,15 @@ So how big a buffer should we create? How far are people likely to walk to get t
 ```
 ```{r, comment = NA}
 #calculate the buffer (distance is 1200 meters)
-  tram_stations_1200_buffer <- st_buffer(tram_stations, 1200)
+  tram_stations_buffer <- st_buffer(tram_stations, 1200)
 ```
 ```{r, comment = NA, eval=FALSE}
 #plot the buffer
-  qtm(tram_stations_1200_buffer)
+  qtm(tram_stations_buffer)
 ```
 
 ```{r, comment = NA}
-tm_shape(tram_stations_1200_buffer[84,]) +
+tm_shape(tram_stations_buffer[84,]) +
   tm_polygons(fill_alpha=0) + 
   tm_shape(tram_stations[c(84,19,94),]) +
   tm_dots(size = 0.4, fill = "darkred") +
@@ -571,7 +571,7 @@ tm_shape(tram_stations_1200_buffer[84,]) +
   tm_polygons(fill = "IMDdecile",
               fill.scale = tm_scale_discrete(),
               fill.legend = tm_legend(title = "IMD Decile")) +
-  tm_shape(tram_stations_1200_buffer[84,]) +
+  tm_shape(tram_stations_buffer[84,]) +
   tm_polygons(fill_alpha=0.3) + 
   tm_shape(tramlines) +
   tm_lines(col = "black") +
