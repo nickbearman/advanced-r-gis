@@ -125,7 +125,7 @@ area_IMD_perTramStation <- areaIMD %>%
 
 
 
-#reorder, most deprived at the top
+#reorder, most deprived at the bottom
 area_IMD_perTramStation_ordered <- area_IMD_perTramStation[order(area_IMD_perTramStation$FinalScore,
                                                                  decreasing = TRUE), ]
 
